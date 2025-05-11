@@ -84,3 +84,4 @@ The `/api/ticker/[symbol]` endpoint returns the following JSON structure:
 MIT
 # WalletWise.AI
 # walletwise
+# walletwise
