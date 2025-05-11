@@ -67,26 +67,6 @@ The `/api/ticker/[symbol]` endpoint returns the following JSON structure:
 - **Similar Stocks**: Recommendations for similar investment opportunities
 - **Responsive Design**: Works on desktop and mobile devices
 
-## v0 Checklist
-
-1. Onboarding experience with clear value proposition
-2. Stock selection from curated list
-3. Price trend visualization with interactive chart
-4. Movement explanation with AI-powered analysis
-5. Fundamentals display with key financial metrics
-6. Risk analysis with AI-generated highlights
-7. Similar stocks recommendations
-8. Responsive design for all devices
-9. Dark mode support
-10. Loading states and error handling
-11. Mock data generation for development
-12. API route contract for future integration
-13. Expandable metric cards with explanations
-14. Two pages: index.tsx (onboarding) and dashboard.tsx
-15. Onboarding offers two buttons that route with mode query-param
-16. Dashboard reads mode and renders single-stock or portfolio scaffold accordingly
-17. Portfolio view shows drop-zone card, info sidebar, disabled "Analyze portfolio" button
-
 ## Next Steps
 
 1. **Integrate Yahoo Finance API**: Replace mock data with real financial data
@@ -103,3 +83,4 @@ The `/api/ticker/[symbol]` endpoint returns the following JSON structure:
 
 MIT
 # WalletWise.AI
+# walletwise
