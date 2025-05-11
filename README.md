@@ -1,4 +1,4 @@
-# WalletWise.AI
+# WalletWise
 
 An AI-powered finance coach for new investors. WalletWise.AI helps users understand stock fundamentals, price movements, and potential risks with AI-generated explanations.
 
@@ -82,6 +82,6 @@ The `/api/ticker/[symbol]` endpoint returns the following JSON structure:
 ## License
 
 MIT
-# WalletWise.AI
-# walletwise
+# WalletWise.ai
+# WalletWise
 # walletwise
