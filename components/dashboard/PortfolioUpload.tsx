@@ -9,7 +9,7 @@ interface PortfolioUploadProps {
 
 export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoaded }) => {
   const [dragActive, setDragActive] = useState(false)
-  const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'error' | 'success'>('idle')
+  const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'processing' | 'error' | 'success'>('idle')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleDrag = (e: React.DragEvent) => {
@@ -51,15 +51,39 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoa
 
     setUploadState('uploading')
     
-    // Simulate file processing
+    // Simulate file upload processing
     setTimeout(() => {
-      setUploadState('success')
+      setUploadState('processing')
       
-      // Notify parent that portfolio is loaded after a delay
+      // Simulate API call to /api/portfolio/insights
+      fetchPortfolioInsights()
+    }, 1500)
+  }
+
+  const fetchPortfolioInsights = async () => {
+    try {
+      // In a real app, this would be an API call
+      // const response = await fetch('/api/portfolio/insights', {
+      //   method: 'POST',
+      //   body: formData, // CSV file data
+      // })
+      // if (!response.ok) throw new Error('Failed to process portfolio')
+      // const positions = await response.json()
+
+      // Simulate API response delay
       setTimeout(() => {
-        onPortfolioLoaded()
+        setUploadState('success')
+        
+        // Notify parent that portfolio is loaded after a small delay
+        setTimeout(() => {
+          onPortfolioLoaded()
+        }, 1000)
       }, 1500)
-    }, 2000)
+    } catch (error) {
+      console.error('Error processing portfolio:', error)
+      setUploadState('error')
+      setErrorMessage("Failed to analyze your portfolio. Please try again.")
+    }
   }
 
   return (
@@ -111,8 +135,18 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoa
               <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
               </div>
-              <h3 className="text-lg font-medium mb-2">Processing your portfolio...</h3>
+              <h3 className="text-lg font-medium mb-2">Uploading your portfolio...</h3>
               <p className="text-muted-foreground">This will just take a moment.</p>
+            </div>
+          )}
+
+          {uploadState === 'processing' && (
+            <div className="py-4">
+              <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              </div>
+              <h3 className="text-lg font-medium mb-2">Analyzing your portfolio...</h3>
+              <p className="text-muted-foreground">Our AI is processing your investments.</p>
             </div>
           )}
 

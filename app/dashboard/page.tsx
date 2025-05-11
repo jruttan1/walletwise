@@ -41,6 +41,14 @@ export default function Dashboard() {
   
   // For portfolio mode
   const [portfolioUploaded, setPortfolioUploaded] = useState(false)
+  const [portfolioPositions, setPortfolioPositions] = useState<any[]>([])
+
+  // Update selectedTicker whenever symbolParam changes
+  useEffect(() => {
+    if (symbolParam) {
+      setSelectedTicker(symbolParam)
+    }
+  }, [symbolParam])
 
   useEffect(() => {
     if (viewMode === "single") {

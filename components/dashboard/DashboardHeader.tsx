@@ -9,9 +9,15 @@ interface DashboardHeaderProps {
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ viewMode }) => (
   <header className="mb-8">
-    <Link href="/" className="text-primary hover:underline text-sm flex items-center mb-4">
-      <ChevronLeft className="h-4 w-4 mr-1" /> Back
-    </Link>
+    {viewMode === "single" ? (
+      <Link href="/dashboard?mode=portfolio" className="text-primary hover:underline text-sm flex items-center mb-4">
+        <ChevronLeft className="h-4 w-4 mr-1" /> Portfolio
+      </Link>
+    ) : (
+      <Link href="/" className="text-primary hover:underline text-sm flex items-center mb-4">
+        <ChevronLeft className="h-4 w-4 mr-1" /> Back
+      </Link>
+    )}
     <div className="flex items-center mb-2">
       <Image src="/mini-logo.svg" alt="WalletWise" width={150} height={150} />
     </div>

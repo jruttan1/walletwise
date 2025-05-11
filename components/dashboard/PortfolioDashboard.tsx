@@ -2,16 +2,17 @@ import React from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { ArrowUpRight, ArrowDownRight, TrendingUp } from "lucide-react"
+import PortfolioGrid from "@/components/PortfolioGrid"
 
 // Mock portfolio data
 const MOCK_PORTFOLIO_DATA = [
-  { ticker: "AAPL", name: "Apple Inc.", allocation: 25, shares: 42, value: 7350, gainLoss: 1250, percentChange: 20.5 },
-  { ticker: "MSFT", name: "Microsoft Corp.", allocation: 20, shares: 30, value: 5880, gainLoss: 980, percentChange: 20 },
-  { ticker: "GOOGL", name: "Alphabet Inc.", allocation: 15, shares: 12, value: 4410, gainLoss: -320, percentChange: -6.8 },
-  { ticker: "AMZN", name: "Amazon.com Inc.", allocation: 15, shares: 24, value: 4410, gainLoss: 680, percentChange: 18.2 },
-  { ticker: "META", name: "Meta Platforms Inc.", allocation: 10, shares: 35, value: 2940, gainLoss: -150, percentChange: -4.9 },
-  { ticker: "TSLA", name: "Tesla Inc.", allocation: 10, shares: 15, value: 2940, gainLoss: 420, percentChange: 16.7 },
-  { ticker: "NVDA", name: "NVIDIA Corp.", allocation: 5, shares: 8, value: 1470, gainLoss: 350, percentChange: 31.2 },
+  { ticker: "AAPL", name: "Apple Inc.", allocation: 25, shares: 42, value: 7350, gainLoss: 1250, percentChange: 20.5, costBasis: 6100 },
+  { ticker: "MSFT", name: "Microsoft Corp.", allocation: 20, shares: 30, value: 5880, gainLoss: 980, percentChange: 20, costBasis: 4900 },
+  { ticker: "GOOGL", name: "Alphabet Inc.", allocation: 15, shares: 12, value: 4410, gainLoss: -320, percentChange: -6.8, costBasis: 4730 },
+  { ticker: "AMZN", name: "Amazon.com Inc.", allocation: 15, shares: 24, value: 4410, gainLoss: 680, percentChange: 18.2, costBasis: 3730 },
+  { ticker: "META", name: "Meta Platforms Inc.", allocation: 10, shares: 35, value: 2940, gainLoss: -150, percentChange: -4.9, costBasis: 3090 },
+  { ticker: "TSLA", name: "Tesla Inc.", allocation: 10, shares: 15, value: 2940, gainLoss: 420, percentChange: 16.7, costBasis: 2520 },
+  { ticker: "NVDA", name: "NVIDIA Corp.", allocation: 5, shares: 8, value: 1470, gainLoss: 350, percentChange: 31.2, costBasis: 1120 },
 ]
 
 const COLORS = [
@@ -31,6 +32,16 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
   const portfolioValue = MOCK_PORTFOLIO_DATA.reduce((sum, holding) => sum + holding.value, 0)
   const portfolioGainLoss = MOCK_PORTFOLIO_DATA.reduce((sum, holding) => sum + holding.gainLoss, 0)
   const portfolioPercentChange = (portfolioGainLoss / (portfolioValue - portfolioGainLoss)) * 100
+
+  // Transform the mock data to match the Position interface expected by PortfolioGrid
+  const positions = MOCK_PORTFOLIO_DATA.map(holding => ({
+    symbol: holding.ticker,
+    name: holding.name,
+    shares: holding.shares,
+    costBasis: holding.costBasis,
+    percentChange: holding.percentChange,
+    // Include any other fields that might be needed
+  }))
 
   return (
     <div className="space-y-8">
@@ -69,7 +80,17 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
         </CardContent>
       </Card>
 
-      {/* Allocation Chart and Holdings */}
+      {/* Portfolio Grid */}
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-0">
+          <CardTitle>Your Holdings</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <PortfolioGrid positions={positions} />
+        </CardContent>
+      </Card>
+
+      {/* Allocation Chart and Top Performers */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Allocation Chart */}
         <Card>
@@ -142,58 +163,6 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Holdings Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Holdings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-medium">Ticker</th>
-                  <th className="text-left py-3 px-4 font-medium">Name</th>
-                  <th className="text-right py-3 px-4 font-medium">Shares</th>
-                  <th className="text-right py-3 px-4 font-medium">Value</th>
-                  <th className="text-right py-3 px-4 font-medium">Gain/Loss</th>
-                  <th className="text-right py-3 px-4 font-medium">% Change</th>
-                  <th className="text-right py-3 px-4 font-medium">Allocation</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MOCK_PORTFOLIO_DATA.map((holding) => (
-                  <tr key={holding.ticker} className="border-b last:border-0 hover:bg-muted/50">
-                    <td className="py-3 px-4 font-medium">{holding.ticker}</td>
-                    <td className="py-3 px-4">{holding.name}</td>
-                    <td className="py-3 px-4 text-right">{holding.shares}</td>
-                    <td className="py-3 px-4 text-right">${holding.value.toLocaleString()}</td>
-                    <td className="py-3 px-4 text-right">
-                      <span className={holding.gainLoss >= 0 ? "text-success" : "text-danger"}>
-                        ${Math.abs(holding.gainLoss).toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end">
-                        {holding.gainLoss >= 0 ? (
-                          <ArrowUpRight className="h-4 w-4 mr-1 text-success" />
-                        ) : (
-                          <ArrowDownRight className="h-4 w-4 mr-1 text-danger" />
-                        )}
-                        <span className={holding.gainLoss >= 0 ? "text-success" : "text-danger"}>
-                          {Math.abs(holding.percentChange).toFixed(1)}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right">{holding.allocation}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 } 
