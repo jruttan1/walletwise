@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 36 10% 88%;
+    --foreground: 0 0% 16%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 16%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 16%;
+
+    --primary: 0 0% 16%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 36 10% 96%;
+    --secondary-foreground: 0 0% 16%;
+
+    --muted: 36 10% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 36 10% 96%;
+    --accent-foreground: 0 0% 16%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 36 10% 90%;
+    --input: 36 10% 90%;
+    --ring: 0 0% 16%;
+
+    --radius: 0.5rem;
+
+    /* Custom colors */
+    --success: 142.1 76.2% 36.3%;
+    --success-foreground: 355.7 100% 97.3%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 48 96% 89%;
+    --danger: 0 70% 50%;
+    --danger-foreground: 0 0% 100%;
+    --chart-line: 0 0% 16%;
+    --chart-grid: 36 10% 90%;
+    --chart-tooltip: 0 0% 100%;
+
+    --foreground-rgb: 41, 41, 41;
+    --background-start-rgb: 228, 226, 221;
+    --background-end-rgb: 228, 226, 221;
+  }
+
+  .dark {
+    --background: 0 0% 16%;
+    --foreground: 36 10% 88%;
+
+    --card: 0 0% 20%;
+    --card-foreground: 36 10% 88%;
+
+    --popover: 0 0% 20%;
+    --popover-foreground: 36 10% 88%;
+
+    --primary: 36 10% 88%;
+    --primary-foreground: 0 0% 16%;
+
+    --secondary: 0 0% 25%;
+    --secondary-foreground: 36 10% 88%;
+
+    --muted: 0 0% 25%;
+    --muted-foreground: 36 10% 65%;
+
+    --accent: 0 0% 25%;
+    --accent-foreground: 36 10% 88%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 36 10% 88%;
+
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 36 10% 65%;
+
+    /* Custom colors */
+    --success: 142.1 70.6% 45.3%;
+    --success-foreground: 144.9 80.4% 10%;
+    --warning: 48 96% 89%;
+    --warning-foreground: 38 92% 50%;
+    --danger: 0 62.8% 30.6%;
+    --danger-foreground: 36 10% 88%;
+    --chart-line: 36 10% 88%;
+    --chart-grid: 0 0% 25%;
+    --chart-tooltip: 0 0% 20%;
+
+    --foreground-rgb: 228, 226, 221;
+    --background-start-rgb: 41, 41, 41;
+    --background-end-rgb: 41, 41, 41;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground text-base;
+    color: rgb(var(--foreground-rgb));
+    background-color: rgb(var(--background-start-rgb));
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50 transition-colors;
+  }
+}
+
+@layer components {
+  .metric-card {
+    @apply rounded-lg border p-3 transition-all duration-200 hover:bg-accent/50 dark:hover:bg-accent/50;
+  }
+
+  .metric-card-expanded {
+    @apply border-primary/30 bg-accent/50 dark:bg-accent/50;
+  }
+
+  .stock-card {
+    @apply space-y-2 rounded-lg border p-4 transition-all duration-200 hover:shadow-md hover:border-primary/30;
+  }
+
+  .risk-item {
+    @apply flex items-start gap-2 p-2 rounded-md transition-all duration-200 hover:bg-accent/50;
+  }
+
+  .chart-container {
+    @apply h-64 w-full overflow-hidden rounded-lg;
+  }
+
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+}
