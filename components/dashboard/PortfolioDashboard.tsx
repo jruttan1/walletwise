@@ -16,16 +16,52 @@ const MOCK_PORTFOLIO_DATA = [
 ]
 
 const COLORS = [
-  "#4f46e5", // indigo-600
-  "#8b5cf6", // violet-500
-  "#ec4899", // pink-500
-  "#f43f5e", // rose-500
-  "#ef4444", // red-500
-  "#f97316", // orange-500
-  "#84cc16", // lime-500
+   "#53515C", // muted indigo
+   "#6B5F7F", // dusty violet
+   "#C98A9E", // muted pink
+   "#B06C72", // mauve-rose
+   "#C2564F", // soft red
+   "#D08A4A", // burnt orange
+   "#8A9F4D", // earthy lime
 ]
 
 interface PortfolioDashboardProps {}
+
+// Custom tooltip formatter
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+        <p className="font-medium text-sm">{data.name}</p>
+        <p className="text-muted-foreground text-sm">{data.ticker}</p>
+        <p className="font-semibold text-lg mt-1">{data.allocation}%</p>
+        <p className="text-muted-foreground text-sm">${data.value.toLocaleString()}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Custom legend formatter
+const CustomLegend = ({ payload }: any) => {
+  return (
+    <div className="flex flex-col gap-2">
+      {payload.map((entry: any, index: number) => (
+        <div key={`item-${index}`} className="flex items-center gap-2">
+          <div
+            className="w-3 h-3 rounded-full"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-sm font-medium">{entry.value}</span>
+          <span className="text-sm text-muted-foreground">
+            ({MOCK_PORTFOLIO_DATA[index].allocation}%)
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
   // Calculate overall portfolio value and gain/loss
@@ -84,6 +120,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
       <Card className="overflow-hidden">
         <CardHeader className="pb-0">
           <CardTitle>Your Holdings</CardTitle>
+          <p className="text-sm text-muted-foreground">This is the good stuff - Click on a stock for your AI insights :)</p>
         </CardHeader>
         <CardContent className="pt-6">
           <PortfolioGrid positions={positions} />
@@ -91,40 +128,45 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
       </Card>
 
       {/* Allocation Chart and Top Performers */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-3">
         {/* Allocation Chart */}
-        <Card>
+        <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle>Asset Allocation</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
+            <div className="h-[250px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={MOCK_PORTFOLIO_DATA}
-                    cx="50%"
+                    cx="45%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
+                    innerRadius={65}
+                    outerRadius={90}
                     paddingAngle={2}
                     dataKey="allocation"
                     nameKey="ticker"
                   >
                     {MOCK_PORTFOLIO_DATA.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={COLORS[index % COLORS.length]}
+                        stroke="var(--background)"
+                        strokeWidth={2}
+                      />
                     ))}
                   </Pie>
-                  <Tooltip
-                    formatter={(value: number) => [`${value}%`, "Allocation"]}
-                    contentStyle={{
-                      backgroundColor: "var(--color-card)",
-                      borderColor: "var(--color-border)",
-                      borderRadius: "0.375rem",
-                      color: "var(--color-card-foreground)",
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend 
+                    content={<CustomLegend />}
+                    layout="vertical"
+                    verticalAlign="middle"
+                    align="right"
+                    wrapperStyle={{
+                      paddingLeft: "20px"
                     }}
                   />
-                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </div>

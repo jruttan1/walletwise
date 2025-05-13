@@ -235,7 +235,7 @@ export default function Dashboard() {
                 isLoading={isLoading} 
                 error={error} 
                 priceHistory={tickerData?.priceHistory} 
-              />
+                          />
 
               {/* Today's Movement Explanation */}
               <MovementExplanationCard 

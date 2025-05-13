@@ -1,6 +1,6 @@
 import React from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Area } from "recharts"
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 
 interface PriceTrendChartProps {
   isLoading: boolean
@@ -8,66 +8,132 @@ interface PriceTrendChartProps {
   priceHistory?: { date: string; close: number }[]
 }
 
-export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({ isLoading, error, priceHistory }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Price Trend (1 Month)</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="h-64">
-        {isLoading ? (
-          <div className="flex h-full items-center justify-center">
+// Simple date formatter
+const formatDate = (dateStr: string) => {
+  try {
+    const date = new Date(dateStr)
+    return `${date.getMonth() + 1}/${date.getDate()}`
+  } catch (e) {
+    return dateStr
+  }
+}
+
+export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({ isLoading, error, priceHistory }) => {
+  // Ensure we have valid data with fallback
+  const data = React.useMemo(() => {
+    if (!priceHistory || priceHistory.length === 0) return []
+    return priceHistory
+  }, [priceHistory])
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Price Trend (1 Month)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
             <div className="animate-pulse text-muted-foreground">Loading chart...</div>
           </div>
-        ) : error ? (
-          <div className="flex h-full items-center justify-center">
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Price Trend (1 Month)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
             <p className="text-destructive">{error}</p>
           </div>
-        ) : priceHistory ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={priceHistory} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <defs>
-                <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0.1} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis
-                dataKey="date"
-                tickFormatter={(value) => {
-                  const date = new Date(value)
-                  return `${date.getMonth() + 1}/${date.getDate()}`
-                }}
-                stroke="var(--color-muted-foreground)"
-              />
-              <YAxis stroke="var(--color-muted-foreground)" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "var(--color-card)",
-                  borderColor: "var(--color-border)",
-                  borderRadius: "0.375rem",
-                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                  color: "var(--color-card-foreground)",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="close"
-                stroke="var(--color-primary)"
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 6 }}
-              />
-              <Area type="monotone" dataKey="close" fill="url(#colorPrice)" fillOpacity={1} />
-            </LineChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="flex h-full items-center justify-center">
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (data.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Price Trend (1 Month)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
             <p className="text-muted-foreground">No data available</p>
           </div>
-        )}
-      </div>
-    </CardContent>
-  </Card>
-) 
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Find min and max for domain
+  const prices = data.map(d => d.close)
+  const minPrice = Math.floor(Math.min(...prices) * 0.98)
+  const maxPrice = Math.ceil(Math.max(...prices) * 1.02)
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Price Trend (1 Month)</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis 
+                dataKey="date" 
+                tickFormatter={formatDate}
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                axisLine={{ stroke: 'hsl(var(--border))' }}
+                tickLine={false}
+              />
+              <YAxis 
+                domain={[minPrice, maxPrice]}
+                tickFormatter={(value) => `$${value}`}
+                width={50}
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                axisLine={{ stroke: 'hsl(var(--border))' }}
+                tickLine={false}
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-background border border-border rounded-md shadow p-2">
+                        <p className="text-sm text-foreground">{formatDate(data.date)}</p>
+                        <p className="text-base font-medium text-foreground">${data.close.toFixed(2)}</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="close"
+                stroke="hsl(var(--primary))"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorGradient)"
+                dot={false}
+                activeDot={{ r: 6, fill: 'hsl(var(--primary))', stroke: 'hsl(var(--background))' }}
+                isAnimationActive={false}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  )
+} 
