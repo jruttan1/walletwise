@@ -2,7 +2,7 @@ import React from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { ArrowUpRight, ArrowDownRight, TrendingUp } from "lucide-react"
-import PortfolioGrid from "@/components/PortfolioGrid"
+import PortfolioGrid from "@/components/portfolio-grid"
 
 // Mock portfolio data
 const MOCK_PORTFOLIO_DATA = [

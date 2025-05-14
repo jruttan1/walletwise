@@ -38,8 +38,8 @@ export default function Page() {
             <ul className="space-y-8">
               {[
                 {
-                  title: "Upload your portfolio",
-                  desc: "Drag in a simple CSV and turn your portfolio into an AI financial classroom.",
+                  title: "Upload your portfolio (or type in a ticker)",
+                  desc: "Drag in a simple CSV and turn your portfolio into a financial classroom or choose a single stock to analyze.",
                 },
                 {
                   title: "Explore personalized insights",
@@ -98,7 +98,7 @@ export default function Page() {
 
           <div className="w-full max-w-3xl mt-6 space-y-4">
             <p className="text-muted-foreground">
-              This is not financial advice. This is an educational tool to help you understand investing. Insights are AI-generated and may not be accurate nor used for financial decisions.
+              This is not financial advice. This is an educational tool to help you understand investing. Insights are AI-generated and may not be accurate nor should be used for financial decisions.
             </p>
           </div>
         </div>
