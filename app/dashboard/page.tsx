@@ -28,6 +28,17 @@ interface TickerData {
   similarStocks: { ticker: string; reason: string; sources: string[] }[]
 }
 
+// Add mock data for initial state
+const MOCK_PORTFOLIO = [
+  { symbol: "AAPL", shares: 25 },
+  { symbol: "MSFT", shares: 20 },
+  { symbol: "GOOGL", shares: 15 },
+  { symbol: "AMZN", shares: 15 },
+  { symbol: "META", shares: 10 },
+  { symbol: "TSLA", shares: 10 },
+  { symbol: "NVDA", shares: 5 }
+];
+
 export default function Dashboard() {
   const searchParams = useSearchParams()
   const viewMode = searchParams.get("mode") || "single"
@@ -41,7 +52,7 @@ export default function Dashboard() {
   
   // For portfolio mode
   const [portfolioUploaded, setPortfolioUploaded] = useState(false)
-  const [portfolioPositions, setPortfolioPositions] = useState<any[]>([])
+  const [portfolioPositions, setPortfolioPositions] = useState(MOCK_PORTFOLIO)
 
   // Update selectedTicker whenever symbolParam changes
   useEffect(() => {
@@ -220,7 +231,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-4xl p-6">
+      <div className="mx-auto max-w-6xl p-6">
         {/* Common Header */}
         <DashboardHeader viewMode={viewMode as "single" | "portfolio"} />
 
@@ -235,7 +246,7 @@ export default function Dashboard() {
                 isLoading={isLoading} 
                 error={error} 
                 priceHistory={tickerData?.priceHistory} 
-                          />
+              />
 
               {/* Today's Movement Explanation */}
               <MovementExplanationCard 
@@ -244,7 +255,7 @@ export default function Dashboard() {
                 movementExplanation={tickerData?.movementExplanation}
               />
 
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                 {/* Fundamentals Card */}
                 <FundamentalsCard 
                   isLoading={isLoading} 

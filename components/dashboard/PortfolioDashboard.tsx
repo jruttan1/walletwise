@@ -3,6 +3,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { ArrowUpRight, ArrowDownRight, TrendingUp } from "lucide-react"
 import PortfolioGrid from "@/components/portfolio-grid"
+import { InvestorPersonality } from "@/components/dashboard/InvestorPersonality"
+import { PortfolioInsights } from "@/components/dashboard/PortfolioInsights"
 
 // Mock portfolio data
 const MOCK_PORTFOLIO_DATA = [
@@ -115,6 +117,38 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Investor Profile */}
+      <InvestorPersonality 
+        portfolioData={{
+          symbols: MOCK_PORTFOLIO_DATA.map(d => d.ticker),
+          weights: MOCK_PORTFOLIO_DATA.map(d => d.allocation)
+        }} 
+      />
+
+      {/* Portfolio Insights */}
+      <PortfolioInsights
+        analysis="Your portfolio shows confidence in disruptive tech giants with strong brand loyalty and innovation potential (Apple's 97% customer satisfaction[3], Tesla's autonomous driving ambitions[1]). However, it lacks diversification, exposing you to sector-specific risks (EV competition[1], cognitive biases toward popular stocks[2]) and reliance on Elon Musk's strategic decisions[4]."
+        citations={[
+          {
+            title: "Tesla Stock vs Apple Stock: Best Buy Right Now According Wall Street",
+            url: "https://www.nasdaq.com/articles/tesla-stock-vs-apple-stock-best-buy-right-now-according-wall-street"
+          },
+          {
+            title: "Attachment to NVIDIA and Apple Stocks",
+            url: "https://www.investopedia.com/attachment-to-nvidia-and-apple-stocks-11706448"
+          },
+          {
+            title: "Apple Customer Satisfaction Analysis",
+            url: "https://www.youtube.com/watch?v=Is17flHfEzA"
+          },
+          {
+            title: "Tesla Stock vs Apple Stock: Billionaires Buy One and Sell Other",
+            url: "https://www.nasdaq.com/articles/tesla-stock-vs-apple-stock-billionaires-buy-one-and-sell-other"
+          }
+        ]}
+        diversificationPicks={["VTI", "BND", "JNJ"]}
+      />
 
       {/* Portfolio Grid */}
       <Card className="overflow-hidden">
