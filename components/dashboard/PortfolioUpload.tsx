@@ -175,7 +175,7 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoa
                 <Check className="h-6 w-6 text-success" />
               </div>
               <h3 className="text-lg font-medium mb-2">Success!</h3>
-              <p className="text-muted-foreground">Loading your dashboard…</p>
+              <p className="text-muted-foreground">Loading your dashboard… Please be patient, the AI is working its magic!</p>
             </div>
           )}
         </div>

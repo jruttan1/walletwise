@@ -25,6 +25,7 @@ export const FundamentalsCard: React.FC<FundamentalsCardProps> = ({
       <CardTitle>Fundamentals</CardTitle>
     </CardHeader>
     <CardContent>
+      <p className="text-sm text-muted-foreground mb-4">Click on a metric to learn more</p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Market Cap */}
         <div
