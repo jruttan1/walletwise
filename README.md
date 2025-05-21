@@ -33,29 +33,6 @@ WalletWise.AI is designed to make stock analysis accessible to new investors by 
    \`\`\`
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## API Route Contract
-
-The `/api/ticker/[symbol]` endpoint returns the following JSON structure:
-
-\`\`\`json
-{
-  "priceHistory": [
-    { "date": "2023-01-01T00:00:00.000Z", "close": 150.25 }
-    // ... 30 days of price data
-  ],
-  "fundamentals": {
-    "marketCap": "$2.8T",
-    "peRatio": "32.4",
-    "revenueTTM": "$394.3B",
-    "epsTTM": "$6.14",
-    "dividendYield": "0.5%"
-  },
-  "movementExplanation": null,  // Will be populated by Sonar API
-  "riskHighlights": [],         // Will be populated by Sonar API
-  "similarStocks": []           // Will be populated by Sonar API
-}
-\`\`\`
-
 ## Features
 
 - **Onboarding Experience**: Simple introduction to the app's features
@@ -82,6 +59,3 @@ The `/api/ticker/[symbol]` endpoint returns the following JSON structure:
 ## License
 
 MIT
-# WalletWise.ai
-# WalletWise
-# walletwise
