@@ -123,7 +123,7 @@ export async function GET(
     const aiPrompt = `
 Analyze ${upperSymbol} stock and provide 3 key risks. Format as JSON:
 {
-  "movementExplanation": "Why did the stock move today? Explain simply.",
+  "movementExplanation": "Why did the stock move this week? Explain simply. Don't mention the movement, price and dates",
   "riskHighlights": [
     {
       "text": "Risk 1 - explain in simple terms"

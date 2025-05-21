@@ -186,6 +186,7 @@ export default function Dashboard() {
                 isLoading={isLoading} 
                 ticker={selectedTicker} 
                 movementExplanation={tickerData?.movementExplanation}
+                priceHistory={tickerData?.priceHistory}
               />
 
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
