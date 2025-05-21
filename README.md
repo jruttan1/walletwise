@@ -50,11 +50,11 @@ WalletWise.AI is designed to make stock analysis accessible and intuitive for ne
 
 1. Clone the repository  
     ```bash
-    git clone https://github.com/yourusername/walletwise-ai.git
+    git clone https://github.com/yourusername/walletwise.git
     ```  
 2. Change into project directory  
     ```bash
-    cd walletwise-ai
+    cd walletwise
     ```  
 3. Install dependencies  
     ```bash
@@ -71,6 +71,9 @@ WalletWise.AI is designed to make stock analysis accessible and intuitive for ne
     ```
     http://localhost:3000
     ```
+3. Add your API key
+   ```
+   copy .env.example into a file called: .env.local and replace the API with your own
 
 ## 🎯 Usage
 
