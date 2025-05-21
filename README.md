@@ -89,7 +89,7 @@ WalletWise.AI is designed to make stock analysis accessible and intuitive for ne
 Use the “Add Stock” form to enter one ticker at a time manually—ideal for quick lookups or adding a single new position.
 
 #### Portfolio CSV Upload  
-For bulk imports, upload a CSV file with your entire portfolio (see format below).
+To get the most out of walletwise, upload a CSV file with your entire portfolio (see format below).
 
 ## 🔄 CSV Upload
 
