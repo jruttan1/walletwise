@@ -26,7 +26,7 @@ export const FundamentalsCard: React.FC<FundamentalsCardProps> = ({
     </CardHeader>
     <CardContent>
       <p className="text-sm text-muted-foreground mb-4">Click on a metric to learn more</p>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="space-y-4">
         {/* Market Cap */}
         <div
           className={`rounded-lg border border-border p-3 cursor-pointer transition-all duration-200 hover:bg-accent/50 ${
@@ -43,7 +43,7 @@ export const FundamentalsCard: React.FC<FundamentalsCardProps> = ({
           {expandedMetric === "marketCap" && (
             <div className="mt-2 border-t border-border pt-2 text-sm">
               <p className="text-muted-foreground">
-                Market capitalization represents the total value of a company's outstanding shares.
+                The total value of a company on the public market, calculated as share price × number of outstanding shares. It shows company size: large-caps ({'>'}10 B) tend to be stable, mid-caps (2–10 B) balance growth and risk, and small-caps ({'<'}2 B) offer higher growth potential but more volatility.
               </p>
               <div className="mt-2 flex justify-between">
                 <a href="#" className="text-primary text-xs hover:underline">
@@ -79,7 +79,7 @@ export const FundamentalsCard: React.FC<FundamentalsCardProps> = ({
           {expandedMetric === "peRatio" && (
             <div className="mt-2 border-t border-border pt-2 text-sm">
               <p className="text-muted-foreground">
-                The price-to-earnings ratio measures a company's current share price relative to its earnings per share.
+              Share price ÷ earnings per share: Shows how much investors pay for $1 of a company's profit. Higher P/E means greater growth expectations; lower P/E can signal value or slower growth.
               </p>
               <div className="mt-2 flex justify-between">
                 <a href="#" className="text-primary text-xs hover:underline">
@@ -115,7 +115,7 @@ export const FundamentalsCard: React.FC<FundamentalsCardProps> = ({
           {expandedMetric === "revenueTTM" && (
             <div className="mt-2 border-t border-border pt-2 text-sm">
               <p className="text-muted-foreground">
-                Trailing twelve months revenue represents the company's total revenue over the past 12 months.
+              Sum of the last four quarters' sales; gives a rolling 12-month snapshot of a company's revenue, smoothing seasonality and highlighting recent growth trends.
               </p>
               <div className="mt-2 flex justify-between">
                 <a href="#" className="text-primary text-xs hover:underline">
@@ -151,7 +151,7 @@ export const FundamentalsCard: React.FC<FundamentalsCardProps> = ({
           {expandedMetric === "epsTTM" && (
             <div className="mt-2 border-t border-border pt-2 text-sm">
               <p className="text-muted-foreground">
-                Earnings per share (TTM) represents a company's profit divided by its outstanding shares over the past 12 months.
+              Net income over the past 12 months divided by outstanding shares, showing average profit per share; higher values (e.g., $8 for Apple) indicate strong profitability, while lower values (e.g., $0.50 for a small startup) suggest weaker earnings or slower growth.
               </p>
               <div className="mt-2 flex justify-between">
                 <a href="#" className="text-primary text-xs hover:underline">
@@ -187,7 +187,7 @@ export const FundamentalsCard: React.FC<FundamentalsCardProps> = ({
           {expandedMetric === "dividendYield" && (
             <div className="mt-2 border-t border-border pt-2 text-sm">
               <p className="text-muted-foreground">
-                Dividend yield shows how much a company pays in dividends each year relative to its stock price.
+              Annual dividends per share ÷ share price, shown as a percentage; a higher yield (e.g., 5%) means more income but can signal risk or slowdown, while a lower yield (e.g., 1%) often reflects a growth-oriented company.
               </p>
               <div className="mt-2 flex justify-between">
                 <a href="#" className="text-primary text-xs hover:underline">

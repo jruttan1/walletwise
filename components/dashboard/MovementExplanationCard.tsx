@@ -6,6 +6,7 @@ interface MovementExplanationCardProps {
   isLoading: boolean
   ticker: string
   movementExplanation?: string | null
+  movementSources?: string[]
   movement?: {
     direction: 'up' | 'down'
     percentage: string
@@ -17,6 +18,7 @@ export const MovementExplanationCard: React.FC<MovementExplanationCardProps> = (
   isLoading, 
   ticker, 
   movementExplanation,
+  movementSources,
   priceHistory,
   movement
 }) => {
@@ -76,8 +78,32 @@ export const MovementExplanationCard: React.FC<MovementExplanationCardProps> = (
             <div className="h-4 bg-muted rounded w-3/4"></div>
           </div>
         ) : movementExplanation ? (
-          <div>
+          <div className="space-y-3">
             <p className="text-card-foreground">{movementExplanation}</p>
+            
+            {/* Debug information */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="text-xs text-muted-foreground mt-2 mb-1">
+                Sources available: {movementSources ? movementSources.length : 0}
+              </div>
+            )}
+            
+            {movementSources && movementSources.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {movementSources.map((source, idx) => (
+                  <a 
+                    key={idx}
+                    href={source}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs flex items-center text-primary hover:underline"
+                  >
+                    <span>Source {idx + 1}</span>
+                    <ExternalLink className="h-3 w-3 ml-1" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <p className="text-muted-foreground">Loading explanation from Sonar...</p>

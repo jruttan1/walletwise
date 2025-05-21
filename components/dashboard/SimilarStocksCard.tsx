@@ -14,7 +14,7 @@ export const SimilarStocksCard: React.FC<SimilarStocksCardProps> = ({ isLoading,
       <CardTitle>Similar Stocks You Might Like</CardTitle>
     </CardHeader>
     <CardContent>
-      <SimilarStocks isLoading={isLoading} ticker={ticker} />
+      <SimilarStocks isLoading={isLoading} ticker={ticker} similarStocks={similarStocks} />
     </CardContent>
   </Card>
 ) 

@@ -7,8 +7,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 const montserrat = Montserrat({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "WalletWise.AI - Your AI-powered Finance Coach",
-  description: "AI-powered finance coach for new investors",
+  title: "WalletWise | Your AI-powered Finance Coach",
+  description: "AI-powered finance analysis for new investors",
     generator: 'v0.dev'
 }
 

@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle, ExternalLink } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import React from "react"
 
@@ -14,20 +14,26 @@ interface RiskHighlightsProps {
 }
 
 // Fallback data for testing
-const FALLBACK_RISKS = [
-  { text: "Increasing competition in the smartphone market may impact future growth." },
-  { text: "Supply chain constraints could affect production capacity." },
-  { text: "Regulatory challenges in key markets pose potential risks." },
+const FALLBACK_RISKS: RiskHighlight[] = [
+  { text: "Increasing competition in the smartphone market may impact future growth.", sources: [] },
+  { text: "Supply chain constraints could affect production capacity.", sources: [] },
+  { text: "Regulatory challenges in key markets pose potential risks.", sources: [] },
 ]
 
 export function RiskHighlights({ isLoading, ticker, risks }: RiskHighlightsProps) {
   // Debug log props
   React.useEffect(() => {
-    console.log('RiskHighlights props:', { isLoading, ticker, risks })
+    console.log('RiskHighlights props:', { 
+      isLoading, 
+      ticker, 
+      risksCount: risks?.length || 0,
+      risksWithSources: risks?.filter(r => r.sources && r.sources.length > 0).length || 0,
+      firstRiskSources: risks?.[0]?.sources
+    })
   }, [isLoading, ticker, risks])
 
   // Determine which data to use
-  const displayRisks = () => {
+  const displayRisks = (): RiskHighlight[] | null => {
     if (risks && risks.length > 0) {
       return risks
     }
@@ -64,11 +70,30 @@ export function RiskHighlights({ isLoading, ticker, risks }: RiskHighlightsProps
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-7">
       {risksToShow.map((risk, index) => (
-        <div key={index} className="flex items-start gap-2">
-          <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
-          <p className="text-sm">{risk.text}</p>
+        <div key={index} className="flex flex-col gap-2">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+            <p className="text-md">{risk.text}</p>
+          </div>
+          
+          {risk.sources && risk.sources.length > 0 && (
+            <div className="ml-7 flex flex-wrap gap-2">
+              {risk.sources.map((source: string, idx: number) => (
+                <a 
+                  key={idx}
+                  href={source}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs flex items-center text-primary hover:underline"
+                >
+                  <span>Source {idx + 1}</span>
+                  <ExternalLink className="h-3 w-3 ml-1" />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       ))}
     </div>

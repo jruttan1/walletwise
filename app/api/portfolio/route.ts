@@ -90,7 +90,7 @@ ${JSON.stringify(portfolioQuotes, null, 2)}
 IMPORTANT: Respond with ONLY a valid JSON object in this exact format (no backticks, no markdown, just pure JSON):
 {
   "personality": "string describing investor type max 4 words keep it fun and engaging",
-  "review": "3-4 sentence review with citation references like [1], [2]",
+  "review": "3-4 sentence review, if there are citation references that apply, use them like [1], [2], only if you have the link",
   "citations": [{"title": "source title", "url": "source url"}],
   "diversify": ["TICKER1","TICKER2","TICKER3"]
 }

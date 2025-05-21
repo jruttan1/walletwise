@@ -24,6 +24,7 @@ interface TickerData {
     dividendYield: string
   }
   movementExplanation: string | null
+  movementSources?: string[]
   riskHighlights: { text: string; sources: string[] }[]
   similarStocks: { ticker: string; reason: string; sources: string[] }[]
 }
@@ -187,6 +188,7 @@ export default function Dashboard() {
                 ticker={selectedTicker} 
                 movementExplanation={tickerData?.movementExplanation}
                 priceHistory={tickerData?.priceHistory}
+                movementSources={tickerData?.movementSources}
               />
 
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">

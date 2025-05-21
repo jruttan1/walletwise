@@ -14,9 +14,10 @@ export async function askSonar(prompt: string): Promise<SonarResponse> {
     body: JSON.stringify({ 
         model: "sonar-reasoning-pro",
         messages: [ //Iterate on system message later
-            { role: "system", content: 'You are a helpful assistant that can answer questions about the stock market for those who are new to the stock market. Be concise and precise. Keep your responses to 3 sentences or less. Dont use extensive financial jargon. Keep it simple and easy to understand.' }, 
+            { role: "system", content: 'You are a helpful assistant that can answer questions about the stock market for those who are new to the stock market. Be concise and precise. Keep your responses to 3 sentences or less. Dont use extensive financial jargon. Keep it simple and easy to understand. ALWAYS include relevant citations from reputable financial sources for any claims or analysis you provide. Include at least 2-3 citations for each response.' }, 
             { role: "user", content: prompt }
         ],
+        pf_enable_citations: true,
     }),
   });
 
@@ -32,10 +33,22 @@ export async function askSonar(prompt: string): Promise<SonarResponse> {
   ? raw.split('</think>').pop()!.trim()
   : raw.trim();
 
-  const citations = (json.citations as string[]).map(url => ({
-    title: url,  
-    url,
-  }));
+  console.log('Sonar API response:', { 
+    citationsExists: 'citations' in json,
+    citationsType: typeof json.citations,
+    citationsValue: json.citations,
+    hasContent: 'choices' in json && json.choices.length > 0,
+    contentLength: raw.length
+  });
+  
+  const citations = Array.isArray(json.citations) 
+    ? json.citations.map((url: string) => ({
+        title: url,  
+        url,
+      }))
+    : [];
+    
+  console.log('Processed citations:', citations);
 
   return { answer, citations };
 }
