@@ -1,21 +1,61 @@
+'use client'
 import React from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { ArrowUpRight, ArrowDownRight, TrendingUp } from "lucide-react"
-import PortfolioGrid from "@/components/portfolio-grid"
-import { InvestorPersonality } from "@/components/dashboard/InvestorPersonality"
-import { PortfolioInsights } from "@/components/dashboard/PortfolioInsights"
+import { PortfolioGrid } from "./PortfolioGrid"
+import { InvestorPersonality } from "./InvestorPersonality"
+import { PortfolioInsights } from "./PortfolioInsights"
 
-// Mock portfolio data
-const MOCK_PORTFOLIO_DATA = [
-  { ticker: "AAPL", name: "Apple Inc.", allocation: 25, shares: 42, value: 7350, gainLoss: 1250, percentChange: 20.5, costBasis: 6100 },
-  { ticker: "MSFT", name: "Microsoft Corp.", allocation: 20, shares: 30, value: 5880, gainLoss: 980, percentChange: 20, costBasis: 4900 },
-  { ticker: "GOOGL", name: "Alphabet Inc.", allocation: 15, shares: 12, value: 4410, gainLoss: -320, percentChange: -6.8, costBasis: 4730 },
-  { ticker: "AMZN", name: "Amazon.com Inc.", allocation: 15, shares: 24, value: 4410, gainLoss: 680, percentChange: 18.2, costBasis: 3730 },
-  { ticker: "META", name: "Meta Platforms Inc.", allocation: 10, shares: 35, value: 2940, gainLoss: -150, percentChange: -4.9, costBasis: 3090 },
-  { ticker: "TSLA", name: "Tesla Inc.", allocation: 10, shares: 15, value: 2940, gainLoss: 420, percentChange: 16.7, costBasis: 2520 },
-  { ticker: "NVDA", name: "NVIDIA Corp.", allocation: 5, shares: 8, value: 1470, gainLoss: 350, percentChange: 31.2, costBasis: 1120 },
-]
+// Portfolio data
+interface Position {
+  symbol: string
+  shares: number
+  costBasis: number
+  currentPrice: number
+  previousPrice: number
+  dailyPct: number
+  value: number
+}
+
+interface Overview {
+  totalValue: number
+  totalGainLoss: number
+  totalGainPct: number
+  holdingsCount: number
+  totalCost: number
+}
+
+interface Allocation {
+  symbol: string
+  pct: number
+  value: number
+}
+
+interface TopPerformer {
+  symbol: string
+  dailyPct: number
+}
+
+interface AIReview {
+  personality: string
+  review: string
+  citations: Array<{
+    title: string
+    url: string
+  }>
+  diversify: string[]
+}
+
+interface PortfolioDashboardProps {
+  data: {
+    positions: Position[]
+    overview: Overview
+    allocation: Allocation[]
+    topPerformers: TopPerformer[]
+    aiReview: AIReview
+  }
+}
 
 const COLORS = [
    "#53515C", // muted indigo
@@ -27,18 +67,21 @@ const COLORS = [
    "#8A9F4D", // earthy lime
 ]
 
-interface PortfolioDashboardProps {}
-
 // Custom tooltip formatter
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
       <div className="bg-background border border-border rounded-lg shadow-lg p-3">
-        <p className="font-medium text-sm">{data.name}</p>
-        <p className="text-muted-foreground text-sm">{data.ticker}</p>
-        <p className="font-semibold text-lg mt-1">{data.allocation}%</p>
-        <p className="text-muted-foreground text-sm">${data.value.toLocaleString()}</p>
+        <p className="font-medium">{data.symbol}</p>
+        <div className="mt-1 space-y-1">
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{data.pct.toFixed(1)}%</span> of portfolio
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">${data.value.toLocaleString()}</span>
+          </p>
+        </div>
       </div>
     );
   }
@@ -46,7 +89,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 // Custom legend formatter
-const CustomLegend = ({ payload }: any) => {
+const CustomLegend = ({ payload, allocation }: any) => {
   return (
     <div className="flex flex-col gap-2">
       {payload.map((entry: any, index: number) => (
@@ -57,7 +100,7 @@ const CustomLegend = ({ payload }: any) => {
           />
           <span className="text-sm font-medium">{entry.value}</span>
           <span className="text-sm text-muted-foreground">
-            ({MOCK_PORTFOLIO_DATA[index].allocation}%)
+            ({allocation[index].pct.toFixed(1)}%)
           </span>
         </div>
       ))}
@@ -65,22 +108,9 @@ const CustomLegend = ({ payload }: any) => {
   );
 };
 
-export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
-  // Calculate overall portfolio value and gain/loss
-  const portfolioValue = MOCK_PORTFOLIO_DATA.reduce((sum, holding) => sum + holding.value, 0)
-  const portfolioGainLoss = MOCK_PORTFOLIO_DATA.reduce((sum, holding) => sum + holding.gainLoss, 0)
-  const portfolioPercentChange = (portfolioGainLoss / (portfolioValue - portfolioGainLoss)) * 100
-
-  // Transform the mock data to match the Position interface expected by PortfolioGrid
-  const positions = MOCK_PORTFOLIO_DATA.map(holding => ({
-    symbol: holding.ticker,
-    name: holding.name,
-    shares: holding.shares,
-    costBasis: holding.costBasis,
-    percentChange: holding.percentChange,
-    // Include any other fields that might be needed
-  }))
-
+export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({
+  data: { positions, overview, allocation, topPerformers, aiReview },
+}) => {
   return (
     <div className="space-y-8">
       {/* Portfolio Summary */}
@@ -92,27 +122,27 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
           <div className="grid gap-6 md:grid-cols-3">
             <div>
               <h3 className="text-lg font-medium text-muted-foreground mb-2">Total Value</h3>
-              <p className="text-3xl font-bold">${portfolioValue.toLocaleString()}</p>
+              <p className="text-3xl font-bold">${overview.totalValue.toLocaleString()}</p>
             </div>
             <div>
               <h3 className="text-lg font-medium text-muted-foreground mb-2">Total Gain/Loss</h3>
               <div className="flex items-center">
-                <p className={`text-3xl font-bold ${portfolioGainLoss >= 0 ? "text-success" : "text-danger"}`}>
-                  ${Math.abs(portfolioGainLoss).toLocaleString()}
+                <p className={`text-3xl font-bold ${overview.totalGainLoss >= 0 ? "text-success" : "text-danger"}`}>
+                  ${Math.abs(overview.totalGainLoss).toLocaleString()}
                 </p>
-                <span className={`ml-2 flex items-center ${portfolioGainLoss >= 0 ? "text-success" : "text-danger"}`}>
-                  {portfolioGainLoss >= 0 ? (
+                <span className={`ml-2 flex items-center ${overview.totalGainLoss >= 0 ? "text-success" : "text-danger"}`}>
+                  {overview.totalGainLoss >= 0 ? (
                     <ArrowUpRight className="h-5 w-5 mr-1" />
                   ) : (
                     <ArrowDownRight className="h-5 w-5 mr-1" />
                   )}
-                  {Math.abs(portfolioPercentChange).toFixed(1)}%
+                  {Math.abs(overview.totalGainPct).toFixed(1)}%
                 </span>
               </div>
             </div>
             <div>
               <h3 className="text-lg font-medium text-muted-foreground mb-2">Holdings</h3>
-              <p className="text-3xl font-bold">{MOCK_PORTFOLIO_DATA.length}</p>
+              <p className="text-3xl font-bold">{overview.holdingsCount}</p>
             </div>
           </div>
         </CardContent>
@@ -121,47 +151,31 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
       {/* Investor Profile */}
       <InvestorPersonality 
         portfolioData={{
-          symbols: MOCK_PORTFOLIO_DATA.map(d => d.ticker),
-          weights: MOCK_PORTFOLIO_DATA.map(d => d.allocation)
-        }} 
+          symbols: allocation.map(d => d.symbol),
+          weights: allocation.map(d => d.pct)
+        }}
+        personality={aiReview.personality}
       />
 
       {/* Portfolio Insights */}
       <PortfolioInsights
-        analysis="Your portfolio shows confidence in disruptive tech giants with strong brand loyalty and innovation potential (Apple's 97% customer satisfaction[3], Tesla's autonomous driving ambitions[1]). However, it lacks diversification, exposing you to sector-specific risks (EV competition[1], cognitive biases toward popular stocks[2]) and reliance on Elon Musk's strategic decisions[4]."
-        citations={[
-          {
-            title: "Tesla Stock vs Apple Stock: Best Buy Right Now According Wall Street",
-            url: "https://www.nasdaq.com/articles/tesla-stock-vs-apple-stock-best-buy-right-now-according-wall-street"
-          },
-          {
-            title: "Attachment to NVIDIA and Apple Stocks",
-            url: "https://www.investopedia.com/attachment-to-nvidia-and-apple-stocks-11706448"
-          },
-          {
-            title: "Apple Customer Satisfaction Analysis",
-            url: "https://www.youtube.com/watch?v=Is17flHfEzA"
-          },
-          {
-            title: "Tesla Stock vs Apple Stock: Billionaires Buy One and Sell Other",
-            url: "https://www.nasdaq.com/articles/tesla-stock-vs-apple-stock-billionaires-buy-one-and-sell-other"
-          }
-        ]}
-        diversificationPicks={["VTI", "BND", "JNJ"]}
+        analysis={aiReview.review}
+        citations={aiReview.citations}
+        diversificationPicks={aiReview.diversify}
       />
 
       {/* Portfolio Grid */}
       <Card className="overflow-hidden">
         <CardHeader className="pb-0">
           <CardTitle>Your Holdings</CardTitle>
-          <p className="text-sm text-muted-foreground">This is the good stuff - Click on a stock for your AI insights :)</p>
+          <p className="text-sm text-muted-foreground">Click on a stock for your AI insights :)</p>
         </CardHeader>
         <CardContent className="pt-6">
           <PortfolioGrid positions={positions} />
         </CardContent>
       </Card>
 
-      {/* Allocation Chart and Top Performers */}
+      {/* Allocation Chart and Biggest Movers */}
       <div className="grid gap-6 md:grid-cols-3">
         {/* Allocation Chart */}
         <Card className="md:col-span-2">
@@ -173,18 +187,18 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={MOCK_PORTFOLIO_DATA}
+                    data={allocation}
                     cx="45%"
                     cy="50%"
                     innerRadius={65}
                     outerRadius={90}
                     paddingAngle={2}
-                    dataKey="allocation"
-                    nameKey="ticker"
+                    dataKey="pct"
+                    nameKey="symbol"
                   >
-                    {MOCK_PORTFOLIO_DATA.map((entry, index) => (
+                    {allocation.map((entry, index) => (
                       <Cell 
-                        key={`cell-${index}`} 
+                        key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
                         stroke="var(--background)"
                         strokeWidth={2}
@@ -193,7 +207,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
                   </Pie>
                   <Tooltip content={<CustomTooltip />} />
                   <Legend 
-                    content={<CustomLegend />}
+                    content={<CustomLegend allocation={allocation} />}
                     layout="vertical"
                     verticalAlign="middle"
                     align="right"
@@ -207,34 +221,48 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = () => {
           </CardContent>
         </Card>
 
-        {/* Top Performers */}
+        {/* Biggest Movers */}
         <Card>
           <CardHeader>
-            <CardTitle>Top Performers</CardTitle>
+            <CardTitle>Biggest Movers</CardTitle>
+            <p className="text-sm text-muted-foreground">Today's largest price changes</p>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {MOCK_PORTFOLIO_DATA
-                .sort((a, b) => b.percentChange - a.percentChange)
+            <div className="divide-y divide-border">
+              {[...(positions || [])]
+                .map(position => ({
+                  symbol: position.symbol,
+                  dailyPct: position.dailyPct,
+                  absDailyPct: Math.abs(position.dailyPct)
+                }))
+                .sort((a, b) => b.absDailyPct - a.absDailyPct)
                 .slice(0, 3)
-                .map((holding) => (
-                  <div
-                    key={holding.ticker}
-                    className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/40 transition-colors"
+                .map((position, index) => (
+                  <div 
+                    key={position.symbol} 
+                    className="py-3 first:pt-0 last:pb-0"
                   >
-                    <div>
-                      <div className="font-medium">{holding.ticker}</div>
-                      <div className="text-sm text-muted-foreground">{holding.name}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="flex items-center text-success">
-                        <TrendingUp className="h-4 w-4 mr-1" />
-                        <span className="font-semibold">{holding.percentChange.toFixed(1)}%</span>
+                    <div className="flex items-center justify-between mb-1">
+                      <div>
+                        <span className="font-medium text-lg">{position.symbol}</span>
+                        <span className="ml-2 text-sm text-muted-foreground">#{index + 1}</span>
                       </div>
-                      <div className="text-sm text-muted-foreground">${holding.value.toLocaleString()}</div>
+                      <span className={`flex items-center font-semibold ${position.dailyPct >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                        {position.dailyPct >= 0 ? (
+                          <ArrowUpRight className="h-5 w-5 mr-1" />
+                        ) : (
+                          <ArrowDownRight className="h-5 w-5 mr-1" />
+                        )}
+                        {Math.abs(position.dailyPct).toFixed(2)}%
+                      </span>
                     </div>
                   </div>
                 ))}
+              {(!positions || positions.length === 0) && (
+                <div className="py-3 text-sm text-muted-foreground text-center">
+                  No performance data available
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

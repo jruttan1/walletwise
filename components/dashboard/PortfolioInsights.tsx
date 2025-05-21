@@ -11,16 +11,16 @@ interface Citation {
 }
 
 interface PortfolioInsightsProps {
-  analysis: string
+  analysis: string | undefined
   citations: Citation[]
   diversificationPicks: string[]
   isLoading?: boolean
 }
 
 export function PortfolioInsights({ 
-  analysis, 
-  citations, 
-  diversificationPicks,
+  analysis = '', // Provide default empty string
+  citations = [], // Provide default empty array
+  diversificationPicks = [], // Provide default empty array
   isLoading = false 
 }: PortfolioInsightsProps) {
   if (isLoading) {
@@ -45,10 +45,15 @@ export function PortfolioInsights({
   }
 
   // Replace citation numbers [n] with linked superscripts
-  const analysisWithLinks = analysis.replace(
+  const analysisWithLinks = analysis?.replace(
     /\[(\d+)\]/g,
-    (_, num) => `<sup><a href="${citations[parseInt(num) - 1]?.url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary/80">[${num}]</a></sup>`
-  )
+    (_, num) => {
+      const citation = citations[parseInt(num) - 1];
+      return citation 
+        ? `<sup><a href="${citation.url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary/80">[${num}]</a></sup>`
+        : `[${num}]`;
+    }
+  ) || 'Analysis not available';
 
   return (
     <Card>
@@ -63,42 +68,46 @@ export function PortfolioInsights({
         />
 
         {/* Diversification Recommendations */}
-        <div>
-          <h4 className="font-medium mb-2">Recommended for Diversification</h4>
-          <div className="flex flex-wrap gap-2">
-            {diversificationPicks.map((ticker) => (
-              <Button
-                key={ticker}
-                variant="outline"
-                size="sm"
-                className="gap-1"
-                onClick={() => window.open(`https://finance.yahoo.com/quote/${ticker}`, '_blank')}
-              >
-                {ticker}
-                <ExternalLink className="h-3 w-3" />
-              </Button>
-            ))}
+        {diversificationPicks.length > 0 && (
+          <div>
+            <h4 className="font-medium mb-2">Recommended for Diversification</h4>
+            <div className="flex flex-wrap gap-2">
+              {diversificationPicks.map((ticker) => (
+                <Button
+                  key={ticker}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                  onClick={() => window.open(`https://finance.yahoo.com/quote/${ticker}`, '_blank')}
+                >
+                  {ticker}
+                  <ExternalLink className="h-3 w-3" />
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Citations List */}
-        <div className="text-xs text-muted-foreground border-t pt-4 mt-4">
-          <h4 className="font-medium mb-2">Sources</h4>
-          <ol className="list-decimal list-inside space-y-1">
-            {citations.map((citation, index) => (
-              <li key={index}>
-                <a
-                  href={citation.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
-                  {citation.title}
-                </a>
-              </li>
-            ))}
-          </ol>
-        </div>
+        {citations.length > 0 && (
+          <div className="text-xs text-muted-foreground border-t pt-4 mt-4">
+            <h4 className="font-medium mb-2">Sources</h4>
+            <ol className="list-decimal list-inside space-y-1">
+              {citations.map((citation, index) => (
+                <li key={index}>
+                  <a
+                    href={citation.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {citation.title}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

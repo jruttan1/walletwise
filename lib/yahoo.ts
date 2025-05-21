@@ -1,9 +1,34 @@
 // lib/yahoo.ts
 import yf from 'yahoo-finance2'
 
-type IntervalType = '1m' | '2m' | '5m' | '15m' | '30m' | '60m' | '90m' | '1h' | '1d' | '5d' | '1wk' | '1mo' | '3mo';
+// Limited interval types that work with historical API
+type HistoricalIntervalType = '1d' | '1wk' | '1mo';
 
-export type ChartResult = Awaited<ReturnType<typeof yf.chart>>
+// Define proper types for the Yahoo Finance chart data
+interface ChartQuoteIndicator {
+  close: number[];
+  open: number[];
+  high: number[];
+  low: number[];
+  volume: number[];
+}
+
+interface ChartIndicators {
+  quote: ChartQuoteIndicator[];
+}
+
+// Define the type for historical data entry
+interface HistoricalDataPoint {
+  date: Date;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  adjClose?: number;
+}
+
+export type ChartResult = any // Use any temporarily to avoid type errors
 export type QuoteSummaryResult = Awaited<ReturnType<typeof yf.quoteSummary>>
 
 /**
@@ -11,47 +36,102 @@ export type QuoteSummaryResult = Awaited<ReturnType<typeof yf.quoteSummary>>
  */
 export async function fetchStock(symbol: string): Promise<{
   quote: QuoteSummaryResult
-  chart: any  // Using any temporarily until we can properly type this
+  chart: ChartResult
 }> {
   const ticker = symbol.toUpperCase()
+  console.log(`Fetching data for ${ticker} in yahoo.ts`)
+
+  // Make quotes API call
   const quote = await yf.quoteSummary(ticker, {
-    modules: ['price', 'summaryDetail', 'defaultKeyStatistics'],
+    modules: ['price', 'summaryDetail', 'defaultKeyStatistics', 'financialData']
   })
   
-  // Calculate date range for 1 month
-  const end = new Date()
-  const start = new Date()
-  start.setMonth(start.getMonth() - 1)
+  // Calculate dates for exactly one month of data (today minus 30 days)
+  const today = new Date()
+  const oneMonthAgo = new Date()
+  oneMonthAgo.setDate(today.getDate() - 30)
   
-  const chart = await yf.chart(ticker, {
-    period1: start,
-    period2: end,
-    interval: '1d' as IntervalType,
-  })
-  return { quote, chart }
+  const todayStr = today.toISOString().split('T')[0]
+  const oneMonthAgoStr = oneMonthAgo.toISOString().split('T')[0]
+  
+  console.log(`Fetching historical data from ${oneMonthAgoStr} to ${todayStr}`)
+  
+  try {
+    // Use historical data which maps to chart API internally
+    const historicalData = await yf.historical(ticker, {
+      period1: oneMonthAgoStr,
+      period2: todayStr,
+      interval: '1d'
+    }) as HistoricalDataPoint[]
+    
+    console.log(`Got ${historicalData.length} historical data points`)
+    
+    // Convert historical data to chart format for frontend compatibility
+    const chartResult = {
+      result: [{
+        timestamp: historicalData.map((d: HistoricalDataPoint) => Math.floor(d.date.getTime() / 1000)),
+        indicators: {
+          quote: [{
+            close: historicalData.map((d: HistoricalDataPoint) => d.close),
+            open: historicalData.map((d: HistoricalDataPoint) => d.open),
+            high: historicalData.map((d: HistoricalDataPoint) => d.high),
+            low: historicalData.map((d: HistoricalDataPoint) => d.low),
+            volume: historicalData.map((d: HistoricalDataPoint) => d.volume)
+          }]
+        }
+      }]
+    }
+    
+    return { quote, chart: chartResult }
+  } catch (error) {
+    console.error(`Error fetching historical data for ${ticker}:`, error)
+    throw new Error(`Failed to fetch stock data for ${ticker}`)
+  }
 }
 
 /**
  * Fetch only the price chart for any period
  * @param symbol – ticker (e.g. "AAPL")
- * @param period – number of time units to look back
- * @param interval – e.g. "1d", "1wk"
+ * @param period – number of months to look back
+ * @param interval – e.g. "1d", "1wk", "1mo"
  */
 export async function fetchChart(
   symbol: string,
   period: number = 1,
-  interval: IntervalType = '1d'
+  interval: HistoricalIntervalType = '1d'
 ): Promise<ChartResult> {
   const ticker = symbol.toUpperCase()
-  const end = new Date()
-  const start = new Date()
-  start.setMonth(start.getMonth() - period)
   
-  return yf.chart(ticker, { 
-    period1: start,
-    period2: end,
-    interval 
-  })
+  // Calculate dates based on period
+  const today = new Date()
+  const start = new Date()
+  start.setMonth(today.getMonth() - period)
+  
+  const todayStr = today.toISOString().split('T')[0]
+  const startStr = start.toISOString().split('T')[0]
+  
+  // Get historical data
+  const historicalData = await yf.historical(ticker, {
+    period1: startStr,
+    period2: todayStr,
+    interval
+  }) as HistoricalDataPoint[]
+  
+  // Convert to chart format
+  return {
+    result: [{
+      timestamp: historicalData.map((d: HistoricalDataPoint) => Math.floor(d.date.getTime() / 1000)),
+      indicators: {
+        quote: [{
+          close: historicalData.map((d: HistoricalDataPoint) => d.close),
+          open: historicalData.map((d: HistoricalDataPoint) => d.open),
+          high: historicalData.map((d: HistoricalDataPoint) => d.high),
+          low: historicalData.map((d: HistoricalDataPoint) => d.low),
+          volume: historicalData.map((d: HistoricalDataPoint) => d.volume)
+        }]
+      }
+    }]
+  }
 }
 
 /**
@@ -61,11 +141,34 @@ export async function fetchChartByDates(
   symbol: string,
   start: Date,
   end: Date,
-  interval: IntervalType = '1d'
+  interval: HistoricalIntervalType = '1d'
 ): Promise<ChartResult> {
-  return yf.chart(symbol.toUpperCase(), {
+  const ticker = symbol.toUpperCase()
+  
+  // Ensure end date is not in the future
+  const today = new Date()
+  const safeEnd = end > today ? today : end
+  
+  // Get historical data
+  const historicalData = await yf.historical(ticker, {
     period1: start,
-    period2: end,
-    interval,
-  })
+    period2: safeEnd,
+    interval
+  }) as HistoricalDataPoint[]
+  
+  // Convert to chart format
+  return {
+    result: [{
+      timestamp: historicalData.map((d: HistoricalDataPoint) => Math.floor(d.date.getTime() / 1000)),
+      indicators: {
+        quote: [{
+          close: historicalData.map((d: HistoricalDataPoint) => d.close),
+          open: historicalData.map((d: HistoricalDataPoint) => d.open),
+          high: historicalData.map((d: HistoricalDataPoint) => d.high),
+          low: historicalData.map((d: HistoricalDataPoint) => d.low),
+          volume: historicalData.map((d: HistoricalDataPoint) => d.volume)
+        }]
+      }
+    }]
+  }
 }

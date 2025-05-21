@@ -1,88 +1,111 @@
+'use client'
 import React, { useState } from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Upload, FileText, AlertTriangle, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface PortfolioUploadProps {
-  onPortfolioLoaded: () => void
+  onPortfolioLoaded: (data: {
+    positions: Array<{
+      symbol: string
+      shares: number
+      costBasis: number
+      currentPrice: number
+      previousPrice: number
+      dailyPct: number
+      value: number
+    }>
+    overview: {
+      totalValue: number
+      totalCost: number
+      totalGainLoss: number
+      totalGainPct: number
+      holdingsCount: number
+    }
+    allocation: Array<{ symbol: string; pct: number; value: number }>
+    topPerformers: Array<{ symbol: string; dailyPct: number }>
+    aiReview: { personality: string; review: string; diversify: string[] }
+  }) => void
 }
 
 export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoaded }) => {
   const [dragActive, setDragActive] = useState(false)
-  const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'processing' | 'error' | 'success'>('idle')
+  const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'error' | 'success'>('idle')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
+    setDragActive(e.type === "dragenter" || e.type === "dragover")
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0])
-    }
+    e.dataTransfer.files[0] && handleFile(e.dataTransfer.files[0])
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0])
-    }
+    e.target.files?.[0] && handleFile(e.target.files[0])
   }
 
-  const handleFile = (file: File) => {
-    // Check if file is CSV
-    if (file.type !== "text/csv" && !file.name.endsWith('.csv')) {
-      setUploadState('error')
-      setErrorMessage("Please upload a CSV file.")
-      return
-    }
-
+  const handleFile = async (file: File) => {
+    console.log('[PortfolioUpload] handleFile', file)
+    // … validation …
+  
     setUploadState('uploading')
-    
-    // Simulate file upload processing
-    setTimeout(() => {
-      setUploadState('processing')
-      
-      // Simulate API call to /api/portfolio/insights
-      fetchPortfolioInsights()
-    }, 1500)
-  }
-
-  const fetchPortfolioInsights = async () => {
+    setErrorMessage(null)
+  
     try {
-      // In a real app, this would be an API call
-      // const response = await fetch('/api/portfolio/insights', {
-      //   method: 'POST',
-      //   body: formData, // CSV file data
-      // })
-      // if (!response.ok) throw new Error('Failed to process portfolio')
-      // const positions = await response.json()
-
-      // Simulate API response delay
-      setTimeout(() => {
-        setUploadState('success')
+      const text = await file.text()
+      // Split into lines, trim, drop empty and header
+      const lines = text
+        .split(/\r?\n/)
+        .map(l => l.trim())
+        .filter(l => l && !l.toLowerCase().startsWith('symbol'))
+  
+      if (lines.length === 0) {
+        throw new Error('CSV has no data rows.')
+      }
+  
+      // Auto-correct each row: split, remove empty, take first 3 columns
+      const positions = lines.map(line => {
+        const cells = line
+          .split(',')
+          .map(c => c.trim())
+          .filter(c => c !== '')
         
-        // Notify parent that portfolio is loaded after a small delay
-        setTimeout(() => {
-          onPortfolioLoaded()
-        }, 1000)
-      }, 1500)
-    } catch (error) {
-      console.error('Error processing portfolio:', error)
+        const [symbol = '', shares = '0', cost = '0'] = cells
+        return {
+          symbol: symbol.toUpperCase(),
+          shares: Number(shares),
+          costBasis: Number(cost),
+        }
+      }).filter(p => p.symbol && !isNaN(p.shares))
+  
+      console.log('[upload] cleaned positions:', positions)
+  
+      const res = await fetch('/api/portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ positions }),
+      })
+  
+      if (res.status === 422) {
+        const err = await res.json()
+        throw new Error(`Invalid tickers: ${err.invalid.join(', ')}`)
+      }
+      if (!res.ok) throw new Error(`Server error: ${res.statusText}`)
+  
+      const data = await res.json()
+      setUploadState('success')
+      setTimeout(() => onPortfolioLoaded(data), 500)
+  
+    } catch (err: any) {
+      console.error(err)
+      setErrorMessage(err.message)
       setUploadState('error')
-      setErrorMessage("Failed to analyze your portfolio. Please try again.")
     }
   }
 
@@ -93,9 +116,11 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoa
       </CardHeader>
       <CardContent>
         <div
-          className={`border-2 border-dashed rounded-lg p-10 text-center ${
-            dragActive ? "border-primary bg-primary/5" : "border-border"
-          } ${uploadState === 'error' ? "border-destructive/50 bg-destructive/5" : ""}`}
+          className={`
+            border-2 border-dashed rounded-lg p-10 text-center
+            ${dragActive ? "border-primary bg-primary/5" : "border-border"}
+            ${uploadState === 'error' ? "border-destructive/50 bg-destructive/5" : ""}
+          `}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
@@ -106,26 +131,17 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoa
               <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
                 <Upload className="h-6 w-6 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium mb-2">Drag and drop your portfolio CSV</h3>
-              <p className="text-muted-foreground mb-4">
-                Or click to browse your files
-              </p>
-              <div className="flex justify-center">
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept=".csv"
-                    className="hidden"
-                    onChange={handleChange}
-                  />
-                  <Button variant="outline" type="button">
-                    <FileText className="mr-2 h-4 w-4" />
-                    Browse files
-                  </Button>
-                </label>
-              </div>
+              <h3 className="text-lg font-medium mb-2">Drag and drop your CSV</h3>
+              <p className="text-muted-foreground mb-4">Or click to browse files</p>
+              <label className="cursor-pointer">
+                <input type="file" accept=".csv" className="hidden" onChange={handleChange} />
+                <Button variant="outline" type="button">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Browse files
+                </Button>
+              </label>
               <p className="text-xs text-muted-foreground mt-6">
-                Your file should include columns for ticker, shares, and cost basis.
+                CSV columns: ticker, shares, cost basis
               </p>
             </>
           )}
@@ -135,18 +151,8 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoa
               <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
               </div>
-              <h3 className="text-lg font-medium mb-2">Uploading your portfolio...</h3>
-              <p className="text-muted-foreground">This will just take a moment.</p>
-            </div>
-          )}
-
-          {uploadState === 'processing' && (
-            <div className="py-4">
-              <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-              </div>
-              <h3 className="text-lg font-medium mb-2">Analyzing your portfolio...</h3>
-              <p className="text-muted-foreground">Our AI is processing your investments.</p>
+              <h3 className="text-lg font-medium mb-2">Analyzing your portfolio…</h3>
+              <p className="text-muted-foreground">This should only take a second.</p>
             </div>
           )}
 
@@ -156,7 +162,7 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoa
                 <AlertTriangle className="h-6 w-6 text-destructive" />
               </div>
               <h3 className="text-lg font-medium mb-2">Upload failed</h3>
-              <p className="text-muted-foreground mb-4">{errorMessage || "There was an error processing your file."}</p>
+              <p className="text-muted-foreground mb-4">{errorMessage}</p>
               <Button onClick={() => setUploadState('idle')} variant="outline">
                 Try again
               </Button>
@@ -168,12 +174,12 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoa
               <div className="mx-auto w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mb-4">
                 <Check className="h-6 w-6 text-success" />
               </div>
-              <h3 className="text-lg font-medium mb-2">Portfolio uploaded!</h3>
-              <p className="text-muted-foreground">Preparing your analysis...</p>
+              <h3 className="text-lg font-medium mb-2">Success!</h3>
+              <p className="text-muted-foreground">Loading your dashboard…</p>
             </div>
           )}
         </div>
       </CardContent>
     </Card>
   )
-} 
+}

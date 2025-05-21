@@ -28,16 +28,39 @@ interface TickerData {
   similarStocks: { ticker: string; reason: string; sources: string[] }[]
 }
 
-// Add mock data for initial state
-const MOCK_PORTFOLIO = [
-  { symbol: "AAPL", shares: 25 },
-  { symbol: "MSFT", shares: 20 },
-  { symbol: "GOOGL", shares: 15 },
-  { symbol: "AMZN", shares: 15 },
-  { symbol: "META", shares: 10 },
-  { symbol: "TSLA", shares: 10 },
-  { symbol: "NVDA", shares: 5 }
-];
+interface PortfolioData {
+  positions: Array<{
+    symbol: string
+    shares: number
+    costBasis: number
+    currentPrice: number
+    previousPrice: number
+    dailyPct: number
+    value: number
+  }>
+  overview: {
+    totalValue: number
+    totalCost: number
+    totalGainLoss: number
+    totalGainPct: number
+    holdingsCount: number
+  }
+  allocation: Array<{
+    symbol: string
+    pct: number
+    value: number
+  }>
+  topPerformers: Array<{
+    symbol: string
+    dailyPct: number
+  }>
+  aiReview: {
+    personality: string
+    review: string
+    citations: Array<{ title: string, url: string }>
+    diversify: string[]
+  }
+}
 
 export default function Dashboard() {
   const searchParams = useSearchParams()
@@ -49,56 +72,86 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedMetric, setExpandedMetric] = useState<string | null>(null)
-  
+
   // For portfolio mode
   const [portfolioUploaded, setPortfolioUploaded] = useState(false)
-  const [portfolioPositions, setPortfolioPositions] = useState(MOCK_PORTFOLIO)
+  const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null)
 
-  // Update selectedTicker whenever symbolParam changes
+  // Combined effect to handle both symbol changes and data fetching
   useEffect(() => {
-    if (symbolParam) {
-      setSelectedTicker(symbolParam)
-    }
-  }, [symbolParam])
-
-  useEffect(() => {
-    if (viewMode === "single") {
-      fetchTickerData(selectedTicker)
-    } else {
-      // Reset loading state for portfolio mode
+    // Only fetch if we're in single stock mode
+    if (viewMode !== "single") {
       setIsLoading(false)
+      return
     }
-  }, [selectedTicker, viewMode])
 
-  const fetchTickerData = async (ticker: string) => {
+    // Update ticker if param changed
+    const newTicker = symbolParam || "AAPL"
+    if (newTicker !== selectedTicker) {
+      setSelectedTicker(newTicker)
+    }
+
+    // Fetch data
+    const fetchData = async () => {
     setIsLoading(true)
     setError(null)
 
     try {
-      // In a real app, this would be an API call
-      // const response = await fetch(`/api/ticker/${ticker}`)
-      // const data = await response.json()
+        const response = await fetch(`/api/ticker/${newTicker}`)
+        if (!response.ok) {
+          throw new Error('Failed to fetch data')
+        }
+        
+        const data = await response.json()
+        if (data.error) {
+          throw new Error(data.error)
+        }
 
-      // For demo purposes, we'll simulate a delay and use mock data
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+        // Debug log the API response
+        console.log('API Response:', {
+          ticker: newTicker,
+          priceHistoryLength: data.priceHistory?.length,
+          priceHistoryData: data.priceHistory,
+          hasRiskHighlights: Boolean(data.riskHighlights?.length),
+          riskHighlights: data.riskHighlights
+        })
 
-      const priceHistory = generateMockPriceHistory(ticker)
-      const fundamentals = getMockFundamentals(ticker)
-
-      setTickerData({
-        priceHistory,
-        fundamentals,
-        movementExplanation: getMockMovementExplanation(ticker),
-        riskHighlights: getMockRiskHighlights(ticker),
-        similarStocks: getMockSimilarStocks(ticker),
-      })
-    } catch (err) {
-      setError("Failed to fetch data. Please try again.")
+        setTickerData(data)
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch data. Please try again.")
       console.error("Error fetching ticker data:", err)
     } finally {
       setIsLoading(false)
     }
   }
+
+    fetchData()
+  }, [viewMode, symbolParam])
+
+  const handlePortfolioData = async (uploadedData: { positions: Array<{ symbol: string, shares: number, costBasis?: number }> }) => {
+    try {
+      const response = await fetch("/api/portfolio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(uploadedData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to analyze portfolio: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setPortfolioData(data);
+      setPortfolioUploaded(true);
+    } catch (error: any) {
+      console.error("Error processing portfolio:", error);
+      setError(error.message || "Failed to analyze portfolio. Please try again.");
+    }
+  };
 
   const toggleMetricExpansion = (metric: string) => {
     if (expandedMetric === metric) {
@@ -106,127 +159,6 @@ export default function Dashboard() {
     } else {
       setExpandedMetric(metric)
     }
-  }
-
-  // Mock data generators
-  const generateMockPriceHistory = (ticker: string) => {
-    const seed = ticker.charCodeAt(0) + ticker.charCodeAt(1)
-    const basePrice = (seed % 10) * 100 + 100
-
-    return Array.from({ length: 30 }, (_, i) => {
-      const date = new Date()
-      date.setDate(date.getDate() - (30 - i))
-
-      // Create a somewhat realistic price pattern with some randomness
-      const dayFactor = Math.sin(i / 5) * 10
-      const randomFactor = Math.random() * 10 - 5
-      const price = basePrice + dayFactor + randomFactor + i / 2
-
-      return {
-        date: date.toISOString().split("T")[0],
-        close: Number.parseFloat(price.toFixed(2)),
-      }
-    })
-  }
-
-  const getMockFundamentals = (ticker: string) => {
-    const fundamentalsMap: Record<string, any> = {
-      AAPL: { marketCap: "$2.8T", peRatio: "32.4", revenueTTM: "$394.3B", epsTTM: "$6.14", dividendYield: "0.5%" },
-      MSFT: { marketCap: "$2.7T", peRatio: "36.2", revenueTTM: "$211.9B", epsTTM: "$9.21", dividendYield: "0.8%" },
-      GOOGL: { marketCap: "$1.7T", peRatio: "25.1", revenueTTM: "$307.4B", epsTTM: "$5.80", dividendYield: "0%" },
-      AMZN: { marketCap: "$1.6T", peRatio: "59.3", revenueTTM: "$574.8B", epsTTM: "$2.90", dividendYield: "0%" },
-      NVDA: { marketCap: "$1.2T", peRatio: "74.2", revenueTTM: "$44.9B", epsTTM: "$4.44", dividendYield: "0.1%" },
-      TSLA: { marketCap: "$752.3B", peRatio: "47.8", revenueTTM: "$96.8B", epsTTM: "$4.30", dividendYield: "0%" },
-    }
-
-    return fundamentalsMap[ticker] || fundamentalsMap["AAPL"]
-  }
-
-  const getMockMovementExplanation = (ticker: string) => {
-    const explanations = [
-      `${ticker} is up today primarily due to the announcement of a new product line and better-than-expected quarterly earnings. Analysts have responded positively to the news, with several upgrading their price targets.`,
-      `${ticker} is down today following reports of supply chain constraints affecting production capacity. The company also faces increased competition in key markets, which may impact future growth prospects.`,
-      `${ticker} is showing mixed movement as investors digest recent regulatory developments. While the company reported strong revenue growth, concerns about margin pressure in the coming quarters have tempered enthusiasm.`,
-    ]
-
-    return explanations[Math.floor(Math.random() * explanations.length)]
-  }
-
-  const getMockRiskHighlights = (ticker: string) => {
-    const risks = [
-      [
-        {
-          text: "Increasing competition in the smartphone market may impact future growth.",
-          sources: ["Analyst Report", "Industry Analysis"],
-        },
-        { text: "Supply chain constraints could affect production capacity.", sources: ["Quarterly Report"] },
-        {
-          text: "Regulatory challenges in key markets pose potential risks.",
-          sources: ["Legal Analysis", "Regulatory Filing"],
-        },
-      ],
-      [
-        {
-          text: "Dependency on cloud services revenue creates concentration risk.",
-          sources: ["Earnings Call", "Sector Analysis"],
-        },
-        { text: "Cybersecurity threats could impact customer trust and operations.", sources: ["Security Report"] },
-        { text: "Antitrust scrutiny may lead to business model changes.", sources: ["Legal Analysis", "News Reports"] },
-      ],
-      [
-        {
-          text: "Ad revenue fluctuations due to market conditions and privacy changes.",
-          sources: ["Industry Trends", "Quarterly Report"],
-        },
-        {
-          text: "Regulatory pressure regarding data practices and content moderation.",
-          sources: ["Regulatory Filing", "Legal Analysis"],
-        },
-        {
-          text: "Increasing R&D costs for emerging technologies may pressure margins.",
-          sources: ["Financial Analysis", "Earnings Call"],
-        },
-      ],
-    ]
-
-    return risks[Math.floor(Math.random() * risks.length)]
-  }
-
-  const getMockSimilarStocks = (ticker: string) => {
-    const similarStocksMap: Record<string, any> = {
-      AAPL: [
-        { ticker: "MSFT", reason: "Tech giant with diversified product portfolio", sources: ["Sector Analysis"] },
-        { ticker: "GOOGL", reason: "Tech company with strong market position", sources: ["Industry Report"] },
-        { ticker: "META", reason: "Tech company focused on digital products", sources: ["Comparative Analysis"] },
-      ],
-      MSFT: [
-        { ticker: "AAPL", reason: "Tech giant with hardware and software integration", sources: ["Sector Analysis"] },
-        { ticker: "GOOGL", reason: "Cloud services and enterprise solutions competitor", sources: ["Industry Report"] },
-        { ticker: "AMZN", reason: "Major cloud services competitor", sources: ["Comparative Analysis"] },
-      ],
-      GOOGL: [
-        { ticker: "META", reason: "Digital advertising market competitor", sources: ["Sector Analysis"] },
-        { ticker: "MSFT", reason: "Cloud and AI technology competitor", sources: ["Industry Report"] },
-        { ticker: "AMZN", reason: "Tech giant with diverse revenue streams", sources: ["Comparative Analysis"] },
-      ],
-      AMZN: [
-        { ticker: "MSFT", reason: "Cloud services competitor with enterprise focus", sources: ["Sector Analysis"] },
-        { ticker: "WMT", reason: "Retail market competitor", sources: ["Industry Report"] },
-        { ticker: "GOOGL", reason: "Tech company with diverse business model", sources: ["Comparative Analysis"] },
-      ],
-      NVDA: [
-        { ticker: "AMD", reason: "Semiconductor competitor in GPU market", sources: ["Sector Analysis"] },
-        { ticker: "INTC", reason: "Semiconductor industry peer", sources: ["Industry Report"] },
-        { ticker: "TSM", reason: "Semiconductor manufacturing partner", sources: ["Comparative Analysis"] },
-      ],
-      TSLA: [
-        { ticker: "F", reason: "Electric vehicle market competitor", sources: ["Sector Analysis"] },
-        { ticker: "GM", reason: "Auto manufacturer with EV initiatives", sources: ["Industry Report"] },
-        { ticker: "RIVN", reason: "Pure-play electric vehicle manufacturer", sources: ["Comparative Analysis"] },
-      ],
-    }
-
-    return similarStocksMap[ticker] || similarStocksMap["AAPL"]
   }
 
   return (
@@ -245,7 +177,8 @@ export default function Dashboard() {
               <PriceTrendChart 
                 isLoading={isLoading} 
                 error={error} 
-                priceHistory={tickerData?.priceHistory} 
+                priceHistory={tickerData?.priceHistory}
+                ticker={selectedTicker}
               />
 
               {/* Today's Movement Explanation */}
@@ -283,10 +216,10 @@ export default function Dashboard() {
         ) : (
           // Portfolio Dashboard
           <>
-            {portfolioUploaded ? (
-              <PortfolioDashboard />
+            {portfolioUploaded && portfolioData ? (
+              <PortfolioDashboard data={portfolioData} />
             ) : (
-              <PortfolioUpload onPortfolioLoaded={() => setPortfolioUploaded(true)} />
+              <PortfolioUpload onPortfolioLoaded={handlePortfolioData} />
             )}
           </>
         )}
