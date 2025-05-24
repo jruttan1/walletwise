@@ -269,6 +269,9 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({
           </CardContent>
         </Card>
       </div>
+      <p className="text-muted-foreground text-center">
+              This is not financial advice. This is an educational tool to help you understand investing. Insights are AI-generated and may not be accurate nor should be used for financial decisions.
+      </p>
     </div>
   )
 } 

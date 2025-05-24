@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { SendIcon, RotateCcw, Loader2, HelpCircle, AlertCircle, Lightbulb } from "lucide-react"
+import { SendIcon, RotateCcw, Loader2, HelpCircle, AlertCircle, Lightbulb, ExternalLink } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 interface Position {
@@ -41,8 +41,6 @@ interface Message {
 const SAMPLE_QUESTIONS = [
   "What is dollar-cost averaging?",
   "How can I reduce risk in my portfolio?",
-  "Should I invest in individual stocks or ETFs?",
-  "What's a good P/E ratio?",
   "How diversified is my portfolio?",
   "What sectors am I missing in my portfolio?",
 ]
@@ -189,7 +187,7 @@ export function PortfolioQnA({ portfolioData }: PortfolioQnAProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <HelpCircle className="h-5 w-5 text-primary" />
-              Financial Advisor
+              Your AI Finance Coach
             </CardTitle>
             <CardDescription className="mt-1">
               Ask questions about finance, investments, or your portfolio
@@ -252,22 +250,19 @@ export function PortfolioQnA({ portfolioData }: PortfolioQnAProps) {
                       </div>
                       
                       {message.sources && message.sources.length > 0 && (
-                        <div className="mt-2 text-xs text-muted-foreground">
-                          <p className="font-semibold">Sources:</p>
-                          <ul className="list-disc pl-4 mt-1 space-y-1">
-                            {message.sources.map((source, i) => (
-                              <li key={i}>
-                                <a 
-                                  href={source.url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:underline"
-                                >
-                                  {source.title || source.url}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {message.sources.map((source, i) => (
+                            <a
+                              key={i}
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
+                            >
+                              <span>Source {i + 1}</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          ))}
                         </div>
                       )}
                     </div>
