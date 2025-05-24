@@ -54,7 +54,7 @@ export default function Page() {
             className="w-[400px] h-auto block mb-6"
           />
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 max-w-4xl">
-            Your AI-Powered Finance Coach for Smarter Portfolio Investing
+            Invest smarter with AI
           </h1>
           <p className="text-xl max-w-3xl text-muted-foreground mb-12 leading-relaxed">
             Upload your portfolio and get personalized AI insights, diversification tips, and risk analysis. 
