@@ -124,7 +124,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({
               <p className="text-3xl font-bold">${overview.totalValue.toLocaleString()}</p>
             </div>
             <div>
-              <h3 className="text-lg font-medium text-muted-foreground mb-2">Total Gain/Loss</h3>
+              <h3 className="text-lg font-medium text-muted-foreground mb-2">Today's Change</h3>
               <div className="flex items-center">
                 <p className={`text-3xl font-bold ${overview.totalGainLoss >= 0 ? "text-success" : "text-danger"}`}>
                   ${Math.abs(overview.totalGainLoss).toLocaleString()}
@@ -244,7 +244,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({
                     key={position.symbol} 
                     className="py-3 first:pt-0 last:pb-0"
                   >
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between mb- gap-y-3">
                       <div>
                         <span className="font-medium text-lg">{position.symbol}</span>
                         <span className="ml-2 text-sm text-muted-foreground">#{index + 1}</span>

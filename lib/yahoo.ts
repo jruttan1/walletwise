@@ -43,7 +43,7 @@ export async function fetchStock(symbol: string): Promise<{
 
   // Make quotes API call
   const quote = await yf.quoteSummary(ticker, {
-    modules: ['price', 'summaryDetail', 'defaultKeyStatistics', 'financialData']
+    modules: ['price', 'summaryDetail', 'defaultKeyStatistics', 'financialData', 'summaryProfile']
   })
   
   // Calculate dates for exactly one month of data (today minus 30 days)

@@ -14,6 +14,25 @@ interface MovementExplanationCardProps {
   priceHistory?: Array<{ date: string, close: number }> 
 }
 
+// Function to process citations in text
+const processCitations = (text: string, sources: string[]): string => {
+  return text.replace(
+    /\[(\d+)\]/g,
+    (match, num) => {
+      const citationIndex = parseInt(num) - 1;
+      const source = sources[citationIndex];
+      
+      // Only create superscript link if citation actually exists
+      if (source && citationIndex < sources.length) {
+        return `<sup><a href="${source}" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary/80">[${num}]</a></sup>`;
+      }
+      
+      // Remove invalid citation references entirely
+      return '';
+    }
+  );
+};
+
 export const MovementExplanationCard: React.FC<MovementExplanationCardProps> = ({ 
   isLoading, 
   ticker, 
@@ -58,6 +77,10 @@ export const MovementExplanationCard: React.FC<MovementExplanationCardProps> = (
     changePercent = ((latest - previous) / previous) * 100;
   }
 
+  // Process citations in movement explanation
+  const sources = movementSources || [];
+  const processedExplanation = movementExplanation ? processCitations(movementExplanation, sources) : '';
+
   return (
     <Card>
       <CardHeader>
@@ -92,27 +115,22 @@ export const MovementExplanationCard: React.FC<MovementExplanationCardProps> = (
           </div>
         ) : movementExplanation ? (
           <div className="space-y-3">
-            <p className="text-card-foreground">{movementExplanation}</p>
+            <div 
+              className="text-card-foreground"
+              dangerouslySetInnerHTML={{ __html: processedExplanation }}
+            />
             
-            {/* Debug information */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="text-xs text-muted-foreground mt-2 mb-1">
-                Sources available: {movementSources ? movementSources.length : 0}
-              </div>
-            )}
-            
-            {movementSources && movementSources.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {movementSources.map((source, idx) => (
+            {sources.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {sources.map((source, idx) => (
                   <a 
                     key={idx}
                     href={source}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs flex items-center text-primary hover:underline"
+                    className="text-xs text-primary hover:underline"
                   >
-                    <span>Source {idx + 1}</span>
-                    <ExternalLink className="h-3 w-3 ml-1" />
+                    Source {idx + 1}
                   </a>
                 ))}
               </div>

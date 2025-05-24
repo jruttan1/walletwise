@@ -15,6 +15,25 @@ interface SimilarStocksProps {
   similarStocks?: SimilarStock[]
 }
 
+// Function to process citations in text
+const processCitations = (text: string, sources: string[]): string => {
+  return text.replace(
+    /\[(\d+)\]/g,
+    (match, num) => {
+      const citationIndex = parseInt(num) - 1;
+      const source = sources[citationIndex];
+      
+      // Only create superscript link if citation actually exists
+      if (source && citationIndex < sources.length) {
+        return `<sup><a href="${source}" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary/80">[${num}]</a></sup>`;
+      }
+      
+      // Remove invalid citation references entirely
+      return '';
+    }
+  );
+};
+
 export function SimilarStocks({ isLoading, ticker, similarStocks }: SimilarStocksProps) {
   // Fallback data if none provided
   const defaultStocks: SimilarStock[] = [
@@ -42,23 +61,47 @@ export function SimilarStocks({ isLoading, ticker, similarStocks }: SimilarStock
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      {stocksToShow.map((stock) => (
-        <div key={stock.ticker} className="space-y-2 rounded-lg border p-4">
-          <h3 className="font-semibold">{stock.ticker}</h3>
-          <p className="text-sm">{stock.reason}</p>
-          
-          <a
-            href={`https://finance.yahoo.com/quote/${stock.ticker}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-          <Button variant="outline" size="sm" className="mt-2">
-              View on Yahoo Finance
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-          </a>
-        </div>
-      ))}
+      {stocksToShow.map((stock) => {
+        const sources = stock.sources || [];
+        const processedReason = processCitations(stock.reason, sources);
+        
+        return (
+          <div key={stock.ticker} className="space-y-2 rounded-lg border p-4">
+            <h3 className="font-semibold">{stock.ticker}</h3>
+            <div 
+              className="text-sm"
+              dangerouslySetInnerHTML={{ __html: processedReason }}
+            />
+            
+            {sources.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {sources.map((source, idx) => (
+                  <a 
+                    key={idx}
+                    href={source}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Source {idx + 1}
+                  </a>
+                ))}
+              </div>
+            )}
+            
+            <a
+              href={`https://finance.yahoo.com/quote/${stock.ticker}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+            <Button variant="outline" size="sm" className="mt-2">
+                View on Yahoo Finance
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            </a>
+          </div>
+        );
+      })}
     </div>
   )
 }

@@ -23,6 +23,10 @@ interface TickerData {
     epsTTM: string
     dividendYield: string
   }
+  companyInfo: {
+    name: string
+    businessSummary: string | null
+  }
   movementExplanation: string | null
   movementSources?: string[]
   riskHighlights: { text: string; sources: string[] }[]
@@ -89,6 +93,7 @@ export default function Dashboard() {
   // For portfolio mode
   const [portfolioUploaded, setPortfolioUploaded] = useState(false)
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null)
+  const [isProcessingPortfolio, setIsProcessingPortfolio] = useState(false)
 
   // Combined effect to handle both symbol changes and data fetching
   useEffect(() => {
@@ -148,8 +153,19 @@ export default function Dashboard() {
   }, [viewMode, symbolParam])
 
   const handlePortfolioData = async (uploadedData: { positions: Array<{ symbol: string, shares: number }> }) => {
+    console.log('[Dashboard] handlePortfolioData called with:', uploadedData)
+    
+    // Prevent duplicate calls
+    if (isProcessingPortfolio) {
+      console.log('[Dashboard] Already processing portfolio, ignoring duplicate call')
+      return
+    }
+    
+    setIsProcessingPortfolio(true)
+    
     try {
       // Phase 1: Get basic portfolio data (fast)
+      console.log('[Dashboard] Phase 1: Calling /api/portfolio')
       const response = await fetch("/api/portfolio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -165,11 +181,13 @@ export default function Dashboard() {
         throw new Error(data.error);
       }
 
+      console.log('[Dashboard] Phase 1 complete, setting portfolio data')
       // Show portfolio immediately with placeholder AI data
       setPortfolioData(data);
       setPortfolioUploaded(true);
 
       // Phase 2: Get AI analysis in the background (slow)
+      console.log('[Dashboard] Phase 2: Calling /api/portfolio/ai-analysis')
       try {
         const aiResponse = await fetch("/api/portfolio/ai-analysis", {
           method: "POST",
@@ -179,6 +197,7 @@ export default function Dashboard() {
 
         if (aiResponse.ok) {
           const aiReview = await aiResponse.json();
+          console.log('[Dashboard] Phase 2 complete, updating portfolio with AI data')
           // Update the portfolio data with real AI analysis
           setPortfolioData(prev => prev ? { ...prev, aiReview } : null);
         }
@@ -189,6 +208,8 @@ export default function Dashboard() {
     } catch (error: any) {
       console.error("Error processing portfolio:", error);
       setError(error.message || "Failed to analyze portfolio. Please try again.");
+    } finally {
+      setIsProcessingPortfolio(false)
     }
   };
 
@@ -209,7 +230,12 @@ export default function Dashboard() {
         {viewMode === "single" ? (
           // Single Stock Dashboard
           <>
-            <TickerDisplay ticker={selectedTicker} error={error} />
+            <TickerDisplay 
+              ticker={selectedTicker} 
+              error={error} 
+              companyInfo={tickerData?.companyInfo}
+              isLoading={isLoading}
+            />
 
             <div className="space-y-8">
               {/* Price Trend Chart */}

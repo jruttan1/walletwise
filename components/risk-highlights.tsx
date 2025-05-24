@@ -13,6 +13,25 @@ interface RiskHighlightsProps {
   risks?: RiskHighlight[]
 }
 
+// Function to process citations in text
+const processCitations = (text: string, sources: string[]): string => {
+  return text.replace(
+    /\[(\d+)\]/g,
+    (match, num) => {
+      const citationIndex = parseInt(num) - 1;
+      const source = sources[citationIndex];
+      
+      // Only create superscript link if citation actually exists
+      if (source && citationIndex < sources.length) {
+        return `<sup><a href="${source}" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary/80">[${num}]</a></sup>`;
+      }
+      
+      // Remove invalid citation references entirely
+      return '';
+    }
+  );
+};
+
 // Fallback data for testing
 const FALLBACK_RISKS: RiskHighlight[] = [
   { text: "Increasing competition in the smartphone market may impact future growth.", sources: [] },
@@ -71,31 +90,38 @@ export function RiskHighlights({ isLoading, ticker, risks }: RiskHighlightsProps
 
   return (
     <div className="space-y-7">
-      {risksToShow.map((risk, index) => (
-        <div key={index} className="flex flex-col gap-2">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
-            <p className="text-md">{risk.text}</p>
-          </div>
-          
-          {risk.sources && risk.sources.length > 0 && (
-            <div className="ml-7 flex flex-wrap gap-2">
-              {risk.sources.map((source: string, idx: number) => (
-                <a 
-                  key={idx}
-                  href={source}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs flex items-center text-primary hover:underline"
-                >
-                  <span>Source {idx + 1}</span>
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </a>
-              ))}
+      {risksToShow.map((risk, index) => {
+        const sources = risk.sources || [];
+        const processedText = processCitations(risk.text, sources);
+        
+        return (
+          <div key={index} className="flex flex-col gap-2">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+              <div 
+                className="text-md"
+                dangerouslySetInnerHTML={{ __html: processedText }}
+              />
             </div>
-          )}
-        </div>
-      ))}
+            
+            {sources.length > 0 && (
+              <div className="ml-7 flex flex-wrap gap-2">
+                {sources.map((source: string, idx: number) => (
+                  <a 
+                    key={idx}
+                    href={source}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Source {idx + 1}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   )
 }

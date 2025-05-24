@@ -47,14 +47,20 @@ export const PortfolioInsights: React.FC<PortfolioInsightsProps> = ({
     )
   }
 
-  // Replace citation numbers [n] with linked superscripts
+  // Replace citation numbers [n] with linked superscripts, but only for valid citations
   const analysisWithLinks = analysis?.replace(
     /\[(\d+)\]/g,
-    (_, num) => {
-      const citation = citations[parseInt(num) - 1];
-      return citation 
-        ? `<sup><a href="${citation.url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary/80">[${num}]</a></sup>`
-        : `[${num}]`;
+    (match, num) => {
+      const citationIndex = parseInt(num) - 1;
+      const citation = citations[citationIndex];
+      
+      // Only create link if citation actually exists
+      if (citation && citationIndex < citations.length) {
+        return `<sup><a href="${citation.url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary/80">[${num}]</a></sup>`;
+      }
+      
+      // Remove invalid citation references entirely
+      return '';
     }
   ) || 'Analysis not available';
 
@@ -83,15 +89,12 @@ export const PortfolioInsights: React.FC<PortfolioInsightsProps> = ({
               <div className="h-4 bg-muted rounded w-3/4"></div>
             </div>
           ) : (
-            <p className="text-muted-foreground leading-relaxed">{analysis}</p>
+            <div 
+              className="text-muted-foreground leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: analysisWithLinks }}
+            />
           )}
         </div>
-
-        {/* Analysis Text with Citations */}
-        <div 
-          className="text-muted-foreground leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: analysisWithLinks }}
-        />
 
         {/* Diversification Suggestions */}
         <div>

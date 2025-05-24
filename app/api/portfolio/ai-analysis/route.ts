@@ -18,8 +18,11 @@ interface SonarAIReview {
 }
 
 export async function POST(req: NextRequest) {
+  console.log('[AI Analysis API] POST request received at:', new Date().toISOString())
+  
   try {
     const { positions } = await req.json() as { positions: Position[] }
+    console.log('[AI Analysis API] Processing positions:', positions.map(p => p.symbol).join(', '))
 
     // AI review prompt
     const aiPrompt = `

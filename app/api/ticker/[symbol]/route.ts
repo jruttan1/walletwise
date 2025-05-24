@@ -138,9 +138,16 @@ export async function GET(
       dividendYield: ((quote?.summaryDetail?.dividendYield || 0) * 100).toFixed(1) + '%'
     };
 
+    // Extract company information
+    const companyInfo = {
+      name: quote?.price?.longName || quote?.price?.shortName || upperSymbol,
+      businessSummary: quote?.summaryProfile?.longBusinessSummary || null
+    };
+
     return NextResponse.json({
       priceHistory: formattedPriceHistory,
       fundamentals,
+      companyInfo,
       // AI analysis moved to separate endpoint for better performance
       movementExplanation: null,
       movementSources: [],

@@ -70,21 +70,10 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onData }) => {
   
       console.log('[upload] cleaned positions:', positions)
   
-      const res = await fetch('/api/portfolio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ positions }),
-      })
-  
-      if (res.status === 422) {
-        const err = await res.json()
-        throw new Error(`Invalid tickers: ${err.invalid.join(', ')}`)
-      }
-      if (!res.ok) throw new Error(`Server error: ${res.statusText}`)
-  
-      const data = await res.json()
+      // Pass the parsed positions to parent - let dashboard handle API calls
+      console.log('[PortfolioUpload] Calling onData with positions:', { positions })
       setUploadState('success')
-      setTimeout(() => onData(data), 500)
+      setTimeout(() => onData({ positions }), 500)
   
     } catch (err: any) {
       console.error(err)
