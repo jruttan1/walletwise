@@ -8,7 +8,6 @@ import { ArrowUpRight, ArrowDownRight } from "lucide-react"
 interface Position {
   symbol: string
   shares: number
-  costBasis?: number  // Make cost basis optional
   currentPrice: number
   previousPrice: number
   dailyPct: number
@@ -54,12 +53,6 @@ export function PortfolioGrid({ positions }: PortfolioGridProps) {
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Price</span>
                   <span className="font-medium">${position.currentPrice.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Cost Basis</span>
-                  <span className="font-medium">
-                    {position.costBasis ? `$${position.costBasis.toLocaleString()}` : 'N/A'}
-                  </span>
                 </div>
               </div>
             </CardContent>

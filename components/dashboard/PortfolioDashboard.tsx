@@ -6,12 +6,12 @@ import { ArrowUpRight, ArrowDownRight, TrendingUp } from "lucide-react"
 import { PortfolioGrid } from "./PortfolioGrid"
 import { InvestorPersonality } from "./InvestorPersonality"
 import { PortfolioInsights } from "./PortfolioInsights"
+import { PortfolioQnA } from "./PortfolioQnA"
 
 // Portfolio data
 interface Position {
   symbol: string
   shares: number
-  costBasis: number
   currentPrice: number
   previousPrice: number
   dailyPct: number
@@ -23,7 +23,6 @@ interface Overview {
   totalGainLoss: number
   totalGainPct: number
   holdingsCount: number
-  totalCost: number
 }
 
 interface Allocation {
@@ -174,6 +173,9 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({
           <PortfolioGrid positions={positions} />
         </CardContent>
       </Card>
+
+      {/* Portfolio Q&A */}
+      <PortfolioQnA portfolioData={{ positions, overview }} />
 
       {/* Allocation Chart and Biggest Movers */}
       <div className="grid gap-6 md:grid-cols-3">

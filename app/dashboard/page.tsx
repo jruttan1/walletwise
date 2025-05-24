@@ -29,38 +29,50 @@ interface TickerData {
   similarStocks: { ticker: string; reason: string; sources: string[] }[]
 }
 
+// Types
+interface Position {
+  symbol: string
+  shares: number
+  currentPrice: number
+  previousPrice: number
+  dailyPct: number
+  value: number
+}
+
+interface Overview {
+  totalValue: number
+  totalGainLoss: number
+  totalGainPct: number
+  holdingsCount: number
+}
+
+interface Allocation {
+  symbol: string
+  pct: number
+  value: number
+}
+
+interface TopPerformer {
+  symbol: string
+  dailyPct: number
+}
+
+interface AIReview {
+  personality: string
+  review: string
+  citations: Array<{
+    title: string
+    url: string
+  }>
+  diversify: string[]
+}
+
 interface PortfolioData {
-  positions: Array<{
-    symbol: string
-    shares: number
-    costBasis: number
-    currentPrice: number
-    previousPrice: number
-    dailyPct: number
-    value: number
-  }>
-  overview: {
-    totalValue: number
-    totalCost: number
-    totalGainLoss: number
-    totalGainPct: number
-    holdingsCount: number
-  }
-  allocation: Array<{
-    symbol: string
-    pct: number
-    value: number
-  }>
-  topPerformers: Array<{
-    symbol: string
-    dailyPct: number
-  }>
-  aiReview: {
-    personality: string
-    review: string
-    citations: Array<{ title: string, url: string }>
-    diversify: string[]
-  }
+  positions: Position[]
+  overview: Overview
+  allocation: Allocation[]
+  topPerformers: TopPerformer[]
+  aiReview: AIReview
 }
 
 export default function Dashboard() {
@@ -94,10 +106,11 @@ export default function Dashboard() {
 
     // Fetch data
     const fetchData = async () => {
-    setIsLoading(true)
-    setError(null)
+      setIsLoading(true)
+      setError(null)
 
-    try {
+      try {
+        // Phase 1: Get basic stock data (fast - price history, fundamentals)
         const response = await fetch(`/api/ticker/${newTicker}`)
         if (!response.ok) {
           throw new Error('Failed to fetch data')
@@ -108,29 +121,35 @@ export default function Dashboard() {
           throw new Error(data.error)
         }
 
-        // Debug log the API response
-        console.log('API Response:', {
-          ticker: newTicker,
-          priceHistoryLength: data.priceHistory?.length,
-          priceHistoryData: data.priceHistory,
-          hasRiskHighlights: Boolean(data.riskHighlights?.length),
-          riskHighlights: data.riskHighlights
-        })
-
+        // Show basic data immediately
         setTickerData(data)
+        setIsLoading(false)
+
+        // Phase 2: Get AI analysis in the background (slow - movement explanation, risks, similar stocks)
+        try {
+          const aiResponse = await fetch(`/api/ticker/${newTicker}/ai-analysis`)
+          if (aiResponse.ok) {
+            const aiData = await aiResponse.json()
+            // Update ticker data with AI analysis
+            setTickerData(prev => prev ? { ...prev, ...aiData } : null)
+          }
+        } catch (aiError) {
+          console.warn("AI analysis failed:", aiError)
+          // Keep the basic data - user still sees price charts and fundamentals
+        }
       } catch (err: any) {
         setError(err.message || "Failed to fetch data. Please try again.")
-      console.error("Error fetching ticker data:", err)
-    } finally {
-      setIsLoading(false)
+        console.error("Error fetching ticker data:", err)
+        setIsLoading(false)
+      }
     }
-  }
 
     fetchData()
   }, [viewMode, symbolParam])
 
-  const handlePortfolioData = async (uploadedData: { positions: Array<{ symbol: string, shares: number, costBasis?: number }> }) => {
+  const handlePortfolioData = async (uploadedData: { positions: Array<{ symbol: string, shares: number }> }) => {
     try {
+      // Phase 1: Get basic portfolio data (fast)
       const response = await fetch("/api/portfolio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -146,8 +165,27 @@ export default function Dashboard() {
         throw new Error(data.error);
       }
 
+      // Show portfolio immediately with placeholder AI data
       setPortfolioData(data);
       setPortfolioUploaded(true);
+
+      // Phase 2: Get AI analysis in the background (slow)
+      try {
+        const aiResponse = await fetch("/api/portfolio/ai-analysis", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ positions: data.positions })
+        });
+
+        if (aiResponse.ok) {
+          const aiReview = await aiResponse.json();
+          // Update the portfolio data with real AI analysis
+          setPortfolioData(prev => prev ? { ...prev, aiReview } : null);
+        }
+      } catch (aiError) {
+        console.warn("AI analysis failed:", aiError);
+        // Keep the placeholder AI data - user still sees the portfolio
+      }
     } catch (error: any) {
       console.error("Error processing portfolio:", error);
       setError(error.message || "Failed to analyze portfolio. Please try again.");
@@ -222,7 +260,7 @@ export default function Dashboard() {
             {portfolioUploaded && portfolioData ? (
               <PortfolioDashboard data={portfolioData} />
             ) : (
-              <PortfolioUpload onPortfolioLoaded={handlePortfolioData} />
+              <PortfolioUpload onData={handlePortfolioData} />
             )}
           </>
         )}

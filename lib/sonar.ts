@@ -14,7 +14,7 @@ export async function askSonar(prompt: string): Promise<SonarResponse> {
     body: JSON.stringify({ 
         model: "sonar-reasoning-pro",
         messages: [ //Iterate on system message later
-            { role: "system", content: 'You are a helpful assistant that can answer questions about the stock market for those who are new to the stock market. Be concise and precise. Keep your responses to 3 sentences or less. Dont use extensive financial jargon. Keep it simple and easy to understand. ALWAYS include relevant citations from reputable financial sources for any claims or analysis you provide. Include at least 2-3 citations for each response.' }, 
+            { role: "system", content: 'You are a financial analysis assistant specializing in stock market data for beginners. Follow these guidelines: 1) Use simple, non-technical language accessible to new investors; 2) Provide accurate, fact-based information with citations from reputable sources when available; 3) Always follow the exact output format specified in the user prompt; 4) If the user prompt requests JSON, ensure your response is valid, properly formatted JSON that exactly matches the requested structure. Your primary goal is to make financial information understandable while maintaining accuracy.' }, 
             { role: "user", content: prompt }
         ],
         pf_enable_citations: true,

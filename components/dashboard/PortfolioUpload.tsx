@@ -4,31 +4,16 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Upload, FileText, AlertTriangle, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-interface PortfolioUploadProps {
-  onPortfolioLoaded: (data: {
-    positions: Array<{
-      symbol: string
-      shares: number
-      costBasis: number
-      currentPrice: number
-      previousPrice: number
-      dailyPct: number
-      value: number
-    }>
-    overview: {
-      totalValue: number
-      totalCost: number
-      totalGainLoss: number
-      totalGainPct: number
-      holdingsCount: number
-    }
-    allocation: Array<{ symbol: string; pct: number; value: number }>
-    topPerformers: Array<{ symbol: string; dailyPct: number }>
-    aiReview: { personality: string; review: string; diversify: string[] }
-  }) => void
+interface Position {
+  symbol: string
+  shares: number
 }
 
-export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoaded }) => {
+interface PortfolioUploadProps {
+  onData: (data: { positions: Position[] }) => void
+}
+
+export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onData }) => {
   const [dragActive, setDragActive] = useState(false)
   const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'error' | 'success'>('idle')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -76,11 +61,10 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoa
           .map(c => c.trim())
           .filter(c => c !== '')
         
-        const [symbol = '', shares = '0', cost = '0'] = cells
+        const [symbol = '', shares = '0'] = cells
         return {
           symbol: symbol.toUpperCase(),
           shares: Number(shares),
-          costBasis: Number(cost),
         }
       }).filter(p => p.symbol && !isNaN(p.shares))
   
@@ -100,7 +84,7 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoa
   
       const data = await res.json()
       setUploadState('success')
-      setTimeout(() => onPortfolioLoaded(data), 500)
+      setTimeout(() => onData(data), 500)
   
     } catch (err: any) {
       console.error(err)
@@ -141,7 +125,7 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onPortfolioLoa
                 </Button>
               </label>
               <p className="text-xs text-muted-foreground mt-6">
-                CSV columns: ticker, shares, cost basis
+                CSV columns: ticker, shares
               </p>
             </>
           )}

@@ -9,7 +9,6 @@ const montserrat = Montserrat({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "WalletWise | Your AI-powered Finance Coach",
   description: "AI-powered finance analysis for new investors",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({

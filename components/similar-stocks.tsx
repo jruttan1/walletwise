@@ -52,10 +52,10 @@ export function SimilarStocks({ isLoading, ticker, similarStocks }: SimilarStock
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Button variant="outline" size="sm" className="mt-2">
+          <Button variant="outline" size="sm" className="mt-2">
               View on Yahoo Finance
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
           </a>
         </div>
       ))}

@@ -22,6 +22,8 @@ export const MovementExplanationCard: React.FC<MovementExplanationCardProps> = (
   priceHistory,
   movement
 }) => {
+  const isAnalyzing = movementExplanation === null && !isLoading
+
   // Calculate real movement data from the price history if available
   const calculatedMovement = React.useMemo(() => {
     if (!priceHistory || priceHistory.length < 2) return null;
@@ -48,30 +50,41 @@ export const MovementExplanationCard: React.FC<MovementExplanationCardProps> = (
   // Use provided movement or calculated one
   const displayMovement = movement || calculatedMovement;
 
+  // Calculate percentage change for display
+  let changePercent = 0;
+  if (priceHistory && priceHistory.length >= 2) {
+    const latest = priceHistory[priceHistory.length - 1].close;
+    const previous = priceHistory[priceHistory.length - 2].close;
+    changePercent = ((latest - previous) / previous) * 100;
+  }
+
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center">
-          <CardTitle>This Week's Movement Explained</CardTitle>
-          {!isLoading && displayMovement && (
-            <div className="ml-4 flex items-center">
-              {displayMovement.direction === 'up' ? (
-                <div className="flex items-center text-success">
-                  <TrendingUp className="h-5 w-5 mr-1" />
-                  <span className="font-semibold">{displayMovement.percentage}</span>
-                </div>
-              ) : (
-                <div className="flex items-center text-danger">
-                  <TrendingDown className="h-5 w-5 mr-1" />
-                  <span className="font-semibold">{displayMovement.percentage}</span>
-                </div>
-              )}
-            </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            <CardTitle>What moved {ticker} today?</CardTitle>
+            {isAnalyzing && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+            )}
+          </div>
+          {changePercent !== 0 && (
+            <span className={`text-sm font-medium ${changePercent >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+              {changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%
+            </span>
           )}
         </div>
       </CardHeader>
+
       <CardContent>
         {isLoading ? (
+          <div className="animate-pulse space-y-2">
+            <div className="h-4 bg-muted rounded w-full"></div>
+            <div className="h-4 bg-muted rounded w-full"></div>
+            <div className="h-4 bg-muted rounded w-3/4"></div>
+          </div>
+        ) : isAnalyzing ? (
           <div className="animate-pulse space-y-2">
             <div className="h-4 bg-muted rounded w-full"></div>
             <div className="h-4 bg-muted rounded w-full"></div>
