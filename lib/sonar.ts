@@ -13,7 +13,7 @@ export async function askSonar(prompt: string): Promise<SonarResponse> {
     },
     body: JSON.stringify({ 
         model: "sonar-reasoning-pro",
-        messages: [ //Iterate on system message later
+        messages: [ 
             { role: "system", content: 'You are a financial analysis assistant specializing in stock market data for beginners. Follow these guidelines: 1) Use simple, non-technical language accessible to new investors; 2) Provide accurate, fact-based information with citations from reputable sources when available; 3) Always follow the exact output format specified in the user prompt; 4) If the user prompt requests JSON, ensure your response is valid, properly formatted JSON that exactly matches the requested structure. Your primary goal is to make financial information understandable while maintaining accuracy.' }, 
             { role: "user", content: prompt }
         ],

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from "react"
+import React, { useState, useRef } from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Upload, FileText, AlertTriangle, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -17,6 +17,7 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onData }) => {
   const [dragActive, setDragActive] = useState(false)
   const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'error' | 'success'>('idle')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
@@ -37,7 +38,25 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onData }) => {
 
   const handleFile = async (file: File) => {
     console.log('[PortfolioUpload] handleFile', file)
-    // … validation …
+    
+    // Validation
+    if (!file) {
+      setErrorMessage('No file selected.')
+      setUploadState('error')
+      return
+    }
+    
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      setErrorMessage('Please upload a CSV file.')
+      setUploadState('error')
+      return
+    }
+    
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      setErrorMessage('File is too large. Please upload a file smaller than 5MB.')
+      setUploadState('error')
+      return
+    }
   
     setUploadState('uploading')
     setErrorMessage(null)
@@ -82,6 +101,10 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onData }) => {
     }
   }
 
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click()
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -106,13 +129,17 @@ export const PortfolioUpload: React.FC<PortfolioUploadProps> = ({ onData }) => {
               </div>
               <h3 className="text-lg font-medium mb-2">Drag and drop your CSV</h3>
               <p className="text-muted-foreground mb-4">Or click to browse files</p>
-              <label className="cursor-pointer">
-                <input type="file" accept=".csv" className="hidden" onChange={handleChange} />
-                <Button variant="outline" type="button">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Browse files
-                </Button>
-              </label>
+              <input 
+                ref={fileInputRef}
+                type="file" 
+                accept=".csv" 
+                className="hidden" 
+                onChange={handleChange} 
+              />
+              <Button variant="outline" onClick={handleBrowseClick}>
+                <FileText className="mr-2 h-4 w-4" />
+                Browse files
+              </Button>
               <p className="text-xs text-muted-foreground mt-6">
                 CSV columns: ticker, shares
               </p>

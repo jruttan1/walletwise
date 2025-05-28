@@ -60,13 +60,6 @@ export function PortfolioQnA({ portfolioData }: PortfolioQnAProps) {
     }
   }, [messages])
 
-  // Focus the input field when component mounts
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [])
-
   const generateId = () => Math.random().toString(36).substring(2, 9)
 
   const handleSendQuestion = async () => {

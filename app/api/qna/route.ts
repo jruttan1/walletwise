@@ -58,9 +58,7 @@ function buildEnhancedPrompt(question: string, portfolioData?: PortfolioData): s
     if (portfolioData && portfolioData.positions.length > 0) {
         const { positions, overview } = portfolioData
         
-        // Format individual holdings with detailed information
         const holdingsDetails = positions.map(position => {
-            // Add null checks for position values
             const currentPrice = position.currentPrice || 0
             const gainLoss = currentPrice > 0 ? ((currentPrice - position.previousPrice) / position.previousPrice * 100) : 0
             const gainLossSign = currentPrice >= position.previousPrice ? '+' : ''
@@ -71,7 +69,6 @@ function buildEnhancedPrompt(question: string, portfolioData?: PortfolioData): s
             return `${position.symbol}: ${position.shares || 0} shares, $${value.toLocaleString()} value (${gainLossSign}${gainLoss.toFixed(1)}% vs previous price), ${dailyPctSign}${dailyPct.toFixed(1)}% today`
         }).join('; ')
         
-        // Format portfolio overview with null checks
         const totalValue = overview.totalValue || 0
         const totalGainLoss = overview.totalGainLoss || 0
         const totalGainPct = overview.totalGainPct || 0

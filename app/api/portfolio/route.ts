@@ -40,10 +40,8 @@ export async function POST(req: NextRequest) {
       })
     )
 
-    // Filter out any failed quotes (null values)
     const validQuotes = quotes.filter((q): q is NonNullable<typeof q> => q !== null)
     
-    // Calculate portfolio overview
     const portfolioQuotes = validQuotes.map(p => ({
       ...p,
       value: p.shares * p.currentPrice,
@@ -54,17 +52,14 @@ export async function POST(req: NextRequest) {
     const totalGainLoss = totalValue - yesterdayValue
     const totalGainPct  = yesterdayValue > 0 ? (totalGainLoss / yesterdayValue) * 100 : 0
 
-    // Portfolio overview
     const holdingsCount = portfolioQuotes.length
 
-    // Asset allocation
     const allocation = portfolioQuotes.map(d => ({
       symbol: d.symbol,
       pct:    (d.value / totalValue) * 100,
       value:  d.value,
     }))
 
-    // Top performers
     const topPerformers = [...portfolioQuotes]
       .sort((a, b) => (b.dailyPct || 0) - (a.dailyPct || 0))
       .slice(0, 3)

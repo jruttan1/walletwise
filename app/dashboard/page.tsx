@@ -95,6 +95,13 @@ export default function Dashboard() {
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null)
   const [isProcessingPortfolio, setIsProcessingPortfolio] = useState(false)
 
+  // Scroll to top when portfolio is uploaded
+  useEffect(() => {
+    if (portfolioUploaded && portfolioData) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [portfolioUploaded, portfolioData])
+
   // Combined effect to handle both symbol changes and data fetching
   useEffect(() => {
     // Only fetch if we're in single stock mode

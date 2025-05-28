@@ -1,7 +1,5 @@
-// lib/yahoo.ts
 import yf from 'yahoo-finance2'
 
-// Limited interval types that work with historical API
 type HistoricalIntervalType = '1d' | '1wk' | '1mo';
 
 // Define proper types for the Yahoo Finance chart data
@@ -16,8 +14,6 @@ interface ChartQuoteIndicator {
 interface ChartIndicators {
   quote: ChartQuoteIndicator[];
 }
-
-// Define the type for historical data entry
 interface HistoricalDataPoint {
   date: Date;
   open: number;
@@ -28,12 +24,9 @@ interface HistoricalDataPoint {
   adjClose?: number;
 }
 
-export type ChartResult = any // Use any temporarily to avoid type errors
+export type ChartResult = any 
 export type QuoteSummaryResult = Awaited<ReturnType<typeof yf.quoteSummary>>
 
-/**
- * Fetch fundamentals + 1-month daily history
- */
 export async function fetchStock(symbol: string): Promise<{
   quote: QuoteSummaryResult
   chart: ChartResult
@@ -41,12 +34,10 @@ export async function fetchStock(symbol: string): Promise<{
   const ticker = symbol.toUpperCase()
   console.log(`Fetching data for ${ticker} in yahoo.ts`)
 
-  // Make quotes API call
   const quote = await yf.quoteSummary(ticker, {
     modules: ['price', 'summaryDetail', 'defaultKeyStatistics', 'financialData', 'summaryProfile']
   })
   
-  // Calculate dates for exactly one month of data (today minus 30 days)
   const today = new Date()
   const oneMonthAgo = new Date()
   oneMonthAgo.setDate(today.getDate() - 30)
@@ -57,7 +48,6 @@ export async function fetchStock(symbol: string): Promise<{
   console.log(`Fetching historical data from ${oneMonthAgoStr} to ${todayStr}`)
   
   try {
-    // Use historical data which maps to chart API internally
     const historicalData = await yf.historical(ticker, {
       period1: oneMonthAgoStr,
       period2: todayStr,
@@ -66,7 +56,6 @@ export async function fetchStock(symbol: string): Promise<{
     
     console.log(`Got ${historicalData.length} historical data points`)
     
-    // Convert historical data to chart format for frontend compatibility
     const chartResult = {
       result: [{
         timestamp: historicalData.map((d: HistoricalDataPoint) => Math.floor(d.date.getTime() / 1000)),
@@ -89,12 +78,6 @@ export async function fetchStock(symbol: string): Promise<{
   }
 }
 
-/**
- * Fetch only the price chart for any period
- * @param symbol – ticker (e.g. "AAPL")
- * @param period – number of months to look back
- * @param interval – e.g. "1d", "1wk", "1mo"
- */
 export async function fetchChart(
   symbol: string,
   period: number = 1,
@@ -102,7 +85,6 @@ export async function fetchChart(
 ): Promise<ChartResult> {
   const ticker = symbol.toUpperCase()
   
-  // Calculate dates based on period
   const today = new Date()
   const start = new Date()
   start.setMonth(today.getMonth() - period)
@@ -110,14 +92,12 @@ export async function fetchChart(
   const todayStr = today.toISOString().split('T')[0]
   const startStr = start.toISOString().split('T')[0]
   
-  // Get historical data
   const historicalData = await yf.historical(ticker, {
     period1: startStr,
     period2: todayStr,
     interval
   }) as HistoricalDataPoint[]
   
-  // Convert to chart format
   return {
     result: [{
       timestamp: historicalData.map((d: HistoricalDataPoint) => Math.floor(d.date.getTime() / 1000)),
@@ -134,9 +114,6 @@ export async function fetchChart(
   }
 }
 
-/**
- * Fetch chart data between specific dates
- */
 export async function fetchChartByDates(
   symbol: string,
   start: Date,
@@ -145,18 +122,15 @@ export async function fetchChartByDates(
 ): Promise<ChartResult> {
   const ticker = symbol.toUpperCase()
   
-  // Ensure end date is not in the future
   const today = new Date()
   const safeEnd = end > today ? today : end
   
-  // Get historical data
   const historicalData = await yf.historical(ticker, {
     period1: start,
     period2: safeEnd,
     interval
   }) as HistoricalDataPoint[]
   
-  // Convert to chart format
   return {
     result: [{
       timestamp: historicalData.map((d: HistoricalDataPoint) => Math.floor(d.date.getTime() / 1000)),

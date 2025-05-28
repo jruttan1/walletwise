@@ -138,7 +138,7 @@ export async function GET(
       dividendYield: ((quote?.summaryDetail?.dividendYield || 0) * 100).toFixed(1) + '%'
     };
 
-    // Extract company information
+    // Get company information
     const companyInfo = {
       name: quote?.price?.longName || quote?.price?.shortName || upperSymbol,
       businessSummary: quote?.summaryProfile?.longBusinessSummary || null

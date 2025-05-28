@@ -86,8 +86,7 @@ export const MovementExplanationCard: React.FC<MovementExplanationCardProps> = (
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            <CardTitle>What moved {ticker} today?</CardTitle>
+            <CardTitle>What moved {ticker} this week?</CardTitle>
             {isAnalyzing && (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
             )}
