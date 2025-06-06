@@ -1,6 +1,6 @@
 # 🚀 WalletWise
 
-Your AI-powered finance coach for smarter portfolio investing. WalletWise helps new investors understand their portfolios, analyze individual stocks, and make informed investment decisions with AI insights backed by reliable sources.
+Your AI-powered finance coach for smarter portfolio investing. WalletWise helps new investors understand their portfolios, analyze individual stocks, and make informed investment decisions with AI insights backed by reliable sources. WalletWise combines portfolio insights, AI-powered guidance, and live market data, so you can dig into the nuances of your investments, ask questions, and learn as you go.
 
 ## 🎯 What is WalletWise?
 
@@ -9,6 +9,7 @@ WalletWise is a comprehensive financial analysis platform that combines:
 - **AI Finance Coach**: Interactive Q&A for investment education  
 - **Real-Time Market Data**: Live charts and company fundamentals
 - **AI-Powered Insights**: Movement explanations, risk analysis, and recommendations with proper citations
+- **Citation System**: Inline superscript links to sources, no fake references
 
 Perfect for new investors who want to understand their investments better and grow their financial knowledge.
 
@@ -33,17 +34,11 @@ Perfect for new investors who want to understand their investments better and gr
 - **Risk Highlights**: Identify potential concerns with each holding
 - **Similar Stocks**: Discover comparable investment opportunities
 
-### 🎨 **Modern User Experience**
-- **Fast Loading**: Two-phase loading for instant basic data, AI insights in background
-- **Clean Design**: Montserrat typography and professional card-based layouts
-- **Mobile Responsive**: Works seamlessly on desktop, tablet, and mobile
-- **Citation System**: Inline superscript links to sources, no fake references
-
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14 with TypeScript and Tailwind CSS
 - **Data Visualization**: Recharts for interactive charts
-- **Financial Data**: Yahoo Finance API for real-time market data
+- **Financial Data**: Yahoo Finance library for real-time market data
 - **AI Analysis**: Perplexity Sonar API for intelligent insights with citations
 - **Fonts**: Montserrat for modern, professional typography
 - **Icons**: Lucide React for consistent iconography
@@ -100,8 +95,6 @@ TSLA,15
 - `ticker`: Stock symbol (e.g., AAPL, MSFT)
 - `shares`: Number of shares owned (whole or decimal numbers)
 
-**Note**: Cost basis removed for simplicity - analysis focuses on current market dynamics.
-
 ## 🎯 How to Use WalletWise
 
 ### For Portfolio Analysis:
@@ -112,7 +105,7 @@ TSLA,15
 
 ### For Individual Stocks:
 1. **Enter Ticker**: Type any stock symbol (AAPL, TSLA, etc.)
-2. **View Analysis**: Company description, charts, fundamentals
+2. **View Analysis**: Company description, charts, fundamentals financial metrics
 3. **Understand Movements**: AI explanations for price changes
 4. **Assess Risks**: Review potential concerns and challenges
 
@@ -135,27 +128,7 @@ TSLA,15
 - AI analysis loads progressively
 - Graceful fallbacks if AI services are slow
 
-## 🎨 Design System
-
-- **Typography**: Montserrat font family for professional appearance
-- **Colors**: Neutral palette with primary accent colors
-- **Components**: Card-based layouts with consistent spacing
-- **Citations**: Inline superscript links with clean source buttons
-- **Responsive**: Mobile-first design with desktop enhancements
-
-## 🔮 Current Status
-
-**✅ Completed Features:**
-- Portfolio CSV upload and analysis
-- Real-time stock data integration
-- AI insights with proper citations
-- Interactive Q&A finance coach
-- Company descriptions and fundamentals
-- Risk analysis and movement explanations
-- Mobile-responsive design
-- Two-phase loading optimization
-
-**🚧 Future Enhancements:**
+**🔮 Future Enhancements:**
 - User authentication and saved portfolios
 - Wealthsimple import integration
 - Historical portfolio tracking
