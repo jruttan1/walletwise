@@ -8,8 +8,8 @@ WalletWise is a comprehensive financial analysis platform that combines:
 - **Portfolio Intelligence**: Upload your holdings for personalized analysis
 - **AI Finance Coach**: Interactive Q&A for investment education  
 - **Real-Time Market Data**: Live charts and company fundamentals
-- **AI-Powered Insights**: Movement explanations, risk analysis, and recommendations with proper citations
-- **Citation System**: Inline superscript links to sources, no fake references
+- **AI-Powered Insights**: Movement explanations, risk analysis, and recommendations
+- **Accurate Citations**: AI analysis comes with inline superscript links to sources, no fake references
 
 Perfect for new investors who want to understand their investments better and grow their financial knowledge.
 
