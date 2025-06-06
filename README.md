@@ -73,7 +73,7 @@ Perfect for new investors who want to understand their investments better and gr
    ```
    Add your Perplexity API key to `.env.local`:
    ```
-   PERPLEXITY_API_KEY=your_api_key_here
+   SONAR_KEY=your_api_key_here
    ```
 
 4. **Start the development server**
@@ -131,7 +131,7 @@ TSLA,15
 - **Phase 2**: Background AI processing for insights, explanations, and recommendations
 
 **Benefits:**
-- Users see core data in 2-3 seconds
+- Users see core data in 1-2 seconds
 - AI analysis loads progressively
 - Graceful fallbacks if AI services are slow
 
@@ -157,6 +157,7 @@ TSLA,15
 
 **🚧 Future Enhancements:**
 - User authentication and saved portfolios
+- Wealthsimple import integration
 - Historical portfolio tracking
 - Advanced charting options
 - Social sharing features
@@ -165,9 +166,9 @@ TSLA,15
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create a feature branch (`git checkout -b feature/cool-feature`)
+3. Commit your changes (`git commit -m 'Add cool feature'`)
+4. Push to the branch (`git push origin feature/cool-feature`)
 5. Open a Pull Request
 
 ## ⚠️ Disclaimer
@@ -180,4 +181,4 @@ WalletWise is an educational tool designed to help users understand investing co
 
 ---
 
-**Built with ❤️ for new investors who want to understand their money better.**
+**A tool I wish I had, built to help new investors understand their money better.**
