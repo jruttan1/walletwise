@@ -3,6 +3,7 @@
 Your AI-powered finance coach for smarter portfolio investing. WalletWise helps new investors understand their portfolios, analyze individual stocks, and make informed investment decisions with AI insights backed by reliable sources. WalletWise combines portfolio insights, AI-powered guidance, and live market data, so you can dig into the nuances of your investments, ask questions, and learn as you go.
 
 ![WalletWise Landing Page](docs/images/landing_page.png)
+[▶️ Watch the video walkthrough](https://youtu.be/w6w0OWeG5rY?si=Mgxl7ziw-wtM3z7T)
 
 ## 🎯 What is WalletWise?
 
