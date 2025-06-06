@@ -53,7 +53,7 @@
     "node-cache": "^5.1.2",
     "rate-limiter-flexible": "^7.1.0",
     "react": "^19",
-    "react-day-picker": "8.10.1",
+    "react-day-picker": "^9.4.4",
     "react-dom": "^19",
     "react-hook-form": "^7.54.1",
     "react-resizable-panels": "^2.1.7",
@@ -61,7 +61,7 @@
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "vaul": "^0.9.6",
+    "vaul": "^1.1.1",
     "yahoo-finance2": "^2.13.3",
     "zod": "^3.24.1"
   },
@@ -71,6 +71,8 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "eslint": "9.28.0",
+    "eslint-config-next": "15.3.3",
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"

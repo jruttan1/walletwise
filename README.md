@@ -2,6 +2,8 @@
 
 Your AI-powered finance coach for smarter portfolio investing. WalletWise helps new investors understand their portfolios, analyze individual stocks, and make informed investment decisions with AI insights backed by reliable sources. WalletWise combines portfolio insights, AI-powered guidance, and live market data, so you can dig into the nuances of your investments, ask questions, and learn as you go.
 
+![WalletWise Landing Page](docs/images/landing.png)
+
 ## 🎯 What is WalletWise?
 
 WalletWise is a comprehensive financial analysis platform that combines:
@@ -21,11 +23,15 @@ Perfect for new investors who want to understand their investments better and gr
 - **Diversification Analysis**: AI recommendations for portfolio improvement
 - **Investor Personality**: Understand your investment style and risk profile
 
+![Portfolio Overview](docs/images/portfolio_overview.png)
+
 ### 🤖 **AI Finance Coach**
 - **Interactive Q&A**: Ask anything about investing, your portfolio, or market concepts
 - **Reliable Sources**: All AI responses include proper citations and source links
 - **Personalized Guidance**: Context-aware responses based on your actual holdings
 - **Educational Focus**: Learn while you analyze
+
+![AI Insights Example](docs/images/finance_qna.png)
 
 ### 📈 **Individual Stock Analysis**
 - **Company Descriptions**: Understand what each company actually does
@@ -33,6 +39,8 @@ Perfect for new investors who want to understand their investments better and gr
 - **Movement Explanations**: AI analysis of why stocks moved up or down
 - **Risk Highlights**: Identify potential concerns with each holding
 - **Similar Stocks**: Discover comparable investment opportunities
+
+![Individual Stock Analysis](docs/images/single_stock.png)
 
 ## 🛠️ Tech Stack
 
@@ -90,6 +98,8 @@ MSFT,25
 GOOGL,5
 TSLA,15
 ```
+
+For a sample CSV portfolio, see [examples/sample-portfolio.csv](docs/example/Example_Portfolio.csv).
 
 **Requirements:**
 - `ticker`: Stock symbol (e.g., AAPL, MSFT)

@@ -2,8 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { Wallet, ArrowRight, Brain, TrendingUp, MessageCircle, Shield, Zap, BarChart3 } from "lucide-react"
+import { ArrowRight, Brain, TrendingUp, MessageCircle, Shield, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 

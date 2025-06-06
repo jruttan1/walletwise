@@ -37,7 +37,7 @@ function generateFallbackData(symbol: string): PricePoint[] {
   const startDate = new Date();
   startDate.setDate(endDate.getDate() - 30);
   
-  let currentDate = new Date(startDate);
+  const currentDate = new Date(startDate);
   let currentPrice = basePrice;
   
   while (currentDate <= endDate) {

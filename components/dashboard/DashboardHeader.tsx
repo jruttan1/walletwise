@@ -1,6 +1,6 @@
 import React from "react"
 import Link from "next/link"
-import { ChevronLeft, Wallet } from "lucide-react"
+import { ChevronLeft } from "lucide-react"
 import Image from "next/image"
 
 interface DashboardHeaderProps {
